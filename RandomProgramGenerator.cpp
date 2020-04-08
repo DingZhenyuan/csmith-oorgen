@@ -11,6 +11,7 @@
 #include <cstring>
 #include <cstdio>
 
+#include "platform.h"
 
 using namespace std;
 
