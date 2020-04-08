@@ -12,6 +12,7 @@
 #include <cstdio>
 
 #include "platform.h"
+#include "CGOptions.h"
 
 using namespace std;
 
@@ -22,7 +23,32 @@ bool parse_string_arg(const char *arg, string &s) {
 
 }
 
+// 显示help信息
+static void print_help() {
+
+}
+
+// 显示高级help信息
+static void print_advanced_help() {
+
+}
+
 // 入口
 int main(int argc, char **argv) {
     g_Seed = platform_gen_seed();
+    CGOptions::set_default_settings();
+    // 分析command
+    for (int i = 0; i < argc; i++) {
+        // --help -h
+        if (strcmp (argv[i], "--help") == 0 || strcmp (argv[i], "-h") == 0) {
+            print_help();
+            return 0;
+        }
+        // -hh
+        if (strcmp (argv[i], "-hh") == 0) {
+            print_advanced_help();
+            return 0;
+        }
+        
+    }
 }
