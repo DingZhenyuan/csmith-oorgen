@@ -2,14 +2,21 @@
 #  include <config.h>
 #endif
 
-#include "CGOptions.h"
 #include <iostream>
 #include <cassert>
 #include <cstring>
 #include <map>
 
+#include "CGOptions.h"
+#include "StringUtils.h"
 
 using namespace std;
+
+Reducer* CGOptions::reducer_ = NULL;
+vector<int> CGOptions::safe_math_wrapper_ids_;
+map<string, bool> CGOptions::enabled_builtin_kinds_;
+int CGOptions::int_size_ = 0;
+int CGOptions::pointer_size_ = 0;
 
 
 // 定义各种类型的变量的setters和getters
@@ -157,8 +164,46 @@ DEFINE_GETTER_SETTER_BOOL(fast_execution);
 // 设置变量为默认值
 void CGOptions::set_default_settings(void) {
     set_platform_specific_options();
+
 }
 
+// 在工作目录中查找平台信息文件并加载平台特定信息。
+// 如果未找到，请使用Csmith正在运行的平台上的信息，并将其输出到文件中。
 void CGOptions::set_platform_specific_options(void) {
-
+    const char* int_str = "integer size = ";
+	const char* ptr_str = "pointer size = ";
+	ifstream conf(PLATFORM_CONFIG_FILE);
+	if (conf.fail()) {
+		ofstream conf(PLATFORM_CONFIG_FILE);
+		conf << int_str << sizeof(int) << endl;
+		conf << ptr_str << sizeof(int*) << endl;
+		int_size(sizeof(int));
+		pointer_size(sizeof(int*));
+		conf.close();
+	}
+	else {
+		string line;
+		while(!conf.eof()) {
+			getline(conf, line);
+			if (line.substr(0, strlen(int_str)) == int_str) {
+				string s = line.substr(strlen(int_str));
+				StringUtils::chop(s);
+				int_size(StringUtils::str2int(s));
+			}
+			if (line.substr(0, strlen(ptr_str)) == ptr_str) {
+				string s = line.substr(strlen(ptr_str));
+				StringUtils::chop(s);
+				pointer_size(StringUtils::str2int(s));
+			}
+		}
+		if (!int_size_) {
+			cout << "please specify integer size in " << PLATFORM_CONFIG_FILE << endl;
+			exit(-1);
+		}
+		if (!pointer_size_) {
+			cout << "please specify pointer size in " << PLATFORM_CONFIG_FILE << endl;
+			exit(-1);
+		}
+		conf.close();
+	}
 }
