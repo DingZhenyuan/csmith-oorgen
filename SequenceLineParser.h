@@ -48,6 +48,7 @@ bool SequenceLineParser<Container>::parse_sequence(Container &q, const std::stri
 	return true;
 }
 
+// 将string转成int值
 template <class Container>
 int SequenceLineParser<Container>::str2int(const std::string &s)
 {
