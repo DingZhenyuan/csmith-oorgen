@@ -10,7 +10,7 @@
 
 class SimpleDeltaSequence : public Sequence {
 public:
-	// 根据分隔符来获得一个instance
+	// 根据分隔符来获得一个SimpleDeltaSequence的例子
 	static SimpleDeltaSequence *CreateInstance(const char sep_char);
 
 	virtual ~SimpleDeltaSequence();
