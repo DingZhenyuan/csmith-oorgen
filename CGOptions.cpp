@@ -207,3 +207,7 @@ void CGOptions::set_platform_specific_options(void) {
 		conf.close();
 	}
 }
+
+int CGOptions::int_size(void) {
+    
+}

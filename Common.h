@@ -11,6 +11,7 @@ using std::string;
 using std::vector;
 using namespace std;
 
+// 定义INT64在程序中的表示
 #ifdef WIN32
 #define INT64 __int64
 #else
