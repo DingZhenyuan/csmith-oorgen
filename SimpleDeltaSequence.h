@@ -20,7 +20,7 @@ public:
 	virtual unsigned INT64 sequence_length();
 	// 将v和bound构建成ValuePair，存入到seq_map_中
 	virtual void add_number(int v, int bound, int k);
-	// 先判断bound是否和current_pos_匹配，匹配则返回对应的value值，同是将sequence_中的值存入seq_map_中
+	// 先判断bound是否和current_pos_匹配，匹配则返回对应的value值，同时将sequence_中的值存入seq_map_中
 	virtual int get_number(int bound);
 	// 暂时弃用
 	virtual int get_number_by_pos(int pos);
