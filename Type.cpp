@@ -19,18 +19,26 @@
 
 using namespace std;
 
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ *
+ */
 const Type *Type::simple_types[MAX_SIMPLE_TYPES];
 
 Type *Type::void_type = NULL;
 
-// 包含程序中所有types的列表
+// ---------------------------------------------------------------------
+// List of all types used in the program
 static vector<Type *> AllTypes;
 static vector<Type *> derived_types;
 
-
-class NonVoidTypeFilter : public Filter {
+//////////////////////////////////////////////////////////////////////
+class NonVoidTypeFilter : public Filter
+{
 public:
 	NonVoidTypeFilter();
+
 	virtual ~NonVoidTypeFilter();
 
 	virtual bool filter(int v) const;
@@ -39,21 +47,28 @@ public:
 
 private:
 	mutable Type *typ_;
+
 };
 
 NonVoidTypeFilter::NonVoidTypeFilter()
-	: typ_(NULL) {}
+	: typ_(NULL)
+{
 
-NonVoidTypeFilter::~NonVoidTypeFilter() {}
+}
 
-// 非空类型的过滤器
-bool NonVoidTypeFilter::filter(int v) const {
+NonVoidTypeFilter::~NonVoidTypeFilter()
+{
+
+}
+
+bool
+NonVoidTypeFilter::filter(int v) const
+{
 	assert(static_cast<unsigned int>(v) < AllTypes.size());
 	Type *type = AllTypes[v];
 	if (type->eType == eSimple && type->simple_type == eVoid)
 		return true;
 
-	// 若type未被用过，则记录下来，更改状态为用过
 	if (!type->used) {
 		Bookkeeper::record_type_with_bitfields(type);
 		type->used = true;
@@ -68,14 +83,15 @@ bool NonVoidTypeFilter::filter(int v) const {
 	return false;
 }
 
-// 返回typ_
-Type* NonVoidTypeFilter::get_type() {
+Type *
+NonVoidTypeFilter::get_type()
+{
 	assert(typ_);
 	return typ_;
 }
 
-// 非void非volatile类型的过滤器
-class NonVoidNonVolatileTypeFilter : public Filter {
+class NonVoidNonVolatileTypeFilter : public Filter
+{
 public:
 	NonVoidNonVolatileTypeFilter();
 
@@ -90,16 +106,27 @@ private:
 
 };
 
-NonVoidNonVolatileTypeFilter::NonVoidNonVolatileTypeFilter() : typ_(NULL) {}
-NonVoidNonVolatileTypeFilter::~NonVoidNonVolatileTypeFilter() {}
+NonVoidNonVolatileTypeFilter::NonVoidNonVolatileTypeFilter()
+	: typ_(NULL)
+{
 
+}
 
-bool NonVoidNonVolatileTypeFilter::filter(int v) const {
+NonVoidNonVolatileTypeFilter::~NonVoidNonVolatileTypeFilter()
+{
+
+}
+
+bool
+NonVoidNonVolatileTypeFilter::filter(int v) const
+{
 	assert(static_cast<unsigned int>(v) < AllTypes.size());
 	Type *type = AllTypes[v];
-	if (type->eType == eSimple && type->simple_type == eVoid) return true;
+	if (type->eType == eSimple && type->simple_type == eVoid)
+		return true;
 
-	if (type->is_aggregate() && type->is_volatile_struct_union()) return true;
+	if (type->is_aggregate() && type->is_volatile_struct_union())
+		return true;
 
 	if ((type->eType == eStruct) && (!CGOptions::arg_structs())) {
 		return true;
@@ -123,13 +150,13 @@ bool NonVoidNonVolatileTypeFilter::filter(int v) const {
 	return false;
 }
 
-// 返回typ_
-Type* NonVoidNonVolatileTypeFilter::get_type() {
+Type *
+NonVoidNonVolatileTypeFilter::get_type()
+{
 	assert(typ_);
 	return typ_;
 }
 
-// 随机选择类型过滤器
 class ChooseRandomTypeFilter : public Filter
 {
 public:
@@ -151,12 +178,17 @@ ChooseRandomTypeFilter::ChooseRandomTypeFilter(bool for_field_var, bool struct_h
   : for_field_var_(for_field_var),
     struct_has_assign_ops_(struct_has_assign_ops),
     typ_(NULL)
-{}
+{
+}
 
-ChooseRandomTypeFilter::~ChooseRandomTypeFilter() {}
+ChooseRandomTypeFilter::~ChooseRandomTypeFilter()
+{
 
-// 选择随机类型filter
-bool ChooseRandomTypeFilter::filter(int v) const {
+}
+
+bool
+ChooseRandomTypeFilter::filter(int v) const
+{
 	assert((v >= 0) && (static_cast<unsigned int>(v) < AllTypes.size()));
 	typ_ = AllTypes[v];
 	assert(typ_);
@@ -170,7 +202,6 @@ bool ChooseRandomTypeFilter::filter(int v) const {
 
 	// Struct without assignment ops can not be made a field of a struct with assign ops 
 	// with current implementation of these ops
-	//没有赋值操作的结构不能通过具有这些操作的当前实现的带有赋值操作的结构作为字段
     if (for_field_var_ && struct_has_assign_ops_ && !typ_->has_assign_ops()) {
 		assert(CGOptions::lang_cpp());
 		return true;
@@ -181,13 +212,21 @@ bool ChooseRandomTypeFilter::filter(int v) const {
 	return false;
 }
 
-Type* ChooseRandomTypeFilter::get_type() {
+Type *
+ChooseRandomTypeFilter::get_type()
+{
 	assert(typ_);
 	return typ_;
 }
 
-// helper functions
-static bool checkImplicitNontrivialAssignOps(vector<const Type*> fields) {
+///////////////////////////////////////////////////////////////////////////////
+
+// Helper functions
+
+///////////////////////////////////////////////////////////////////////////////
+
+static bool checkImplicitNontrivialAssignOps(vector<const Type*> fields)
+{
 	if (!CGOptions::lang_cpp()) return false;
 	for (size_t i = 0; i < fields.size(); ++i) {
 		const Type* field = fields[i];
@@ -199,7 +238,11 @@ static bool checkImplicitNontrivialAssignOps(vector<const Type*> fields) {
 	return false;
 }
 
-// simple types的构造函数
+///////////////////////////////////////////////////////////////////////////////
+
+// --------------------------------------------------------------
+/* constructor for simple types
+ ********************************************************/
 Type::Type(eSimpleType simple_type) :
 	eType(eSimple),
 	ptr_type(0),
@@ -214,7 +257,9 @@ Type::Type(eSimpleType simple_type) :
 	// Nothing else to do.
 }
 
-// struct or union types的构造函数
+// --------------------------------------------------------------
+ /* constructor for struct or union types
+  *******************************************************/
 Type::Type(vector<const Type*>& struct_fields, bool isStruct, bool packed,
     vector<CVQualifiers> &qfers, vector<int> &fields_length, bool hasAssignOps, bool hasImplicitNontrivialAssignOps) :
     ptr_type(0),
@@ -236,7 +281,9 @@ Type::Type(vector<const Type*>& struct_fields, bool isStruct, bool packed,
     sid =  sequence++;
 }
 
-// pointers的构造函数
+// --------------------------------------------------------------
+ /* constructor for pointers
+  *******************************************************/
 Type::Type(const Type* t) :
     eType(ePointer),
     ptr_type(t),
@@ -250,6 +297,7 @@ Type::Type(const Type* t) :
 	// Nothing else to do.
 }
 
+// --------------------------------------------------------------
 Type::~Type(void)
 {
 	// Nothing to do.
@@ -272,10 +320,11 @@ Type::operator=(const Type& t)
 	return *this;
 }
 #endif
-// --------------------------------------------------------------
 
-// 获取simple type
-const Type& Type::get_simple_type(eSimpleType st) {
+// ---------------------------------------------------------------------
+const Type &
+Type::get_simple_type(eSimpleType st)
+{
 	static bool inited = false;
 
 	assert(st != MAX_SIMPLE_TYPES);
@@ -288,7 +337,7 @@ const Type& Type::get_simple_type(eSimpleType st) {
 	}
 
 	if (Type::simple_types[st] == 0) {
-		// 查找type是否已经在allTypes中（很可能只有“ eVoid”不存在）
+		// find if type is in the allTypes already (most likely only "eVoid" is not there)
 		for (size_t i=0; i<AllTypes.size(); i++) {
 			Type* tt = AllTypes[i];
 			if (tt->eType == eSimple && tt->simple_type == st) {
@@ -304,8 +353,9 @@ const Type& Type::get_simple_type(eSimpleType st) {
 	return *Type::simple_types[st];
 }
 
-// 从string获取simple type
-const Type* Type::get_type_from_string(const string &type_string) {
+const Type *
+Type::get_type_from_string(const string &type_string)
+{
 	if (type_string == "Void") {
 		return Type::void_type;
 	}
@@ -347,13 +397,18 @@ const Type* Type::get_type_from_string(const string &type_string) {
 	return NULL;
 }
 
-// 获取int类型
-const Type* get_int_type() {
+// ---------------------------------------------------------------------
+/* return the most commonly used type - integer
+ *************************************************************/
+const Type *
+get_int_type()
+{
     return &Type::get_simple_type(eInt);
 }
 
-// 从AllTypes[]中查找某type
-Type* Type::find_type(const Type* t) {
+Type*
+Type::find_type(const Type* t)
+{
     for (size_t i=0; i<AllTypes.size(); i++) {
         if (AllTypes[i] == t) {
             return AllTypes[i];
@@ -362,8 +417,13 @@ Type* Type::find_type(const Type* t) {
     return 0;
 }
 
-// 查找指向给定的现存type的pointer type，如果没找到则返回0
-Type* Type::find_pointer_type(const Type* t, bool add) {
+// ---------------------------------------------------------------------
+/* find the pointer type to the given type in existing types,
+ * return 0 if not found
+ *************************************************************/
+Type*
+Type::find_pointer_type(const Type* t, bool add)
+{
     for (size_t i=0; i<derived_types.size(); i++) {
         if (derived_types[i]->ptr_type == t) {
             return derived_types[i];
@@ -377,8 +437,9 @@ Type* Type::find_pointer_type(const Type* t, bool add) {
     return 0;
 }
 
-// 判断struct或union是否时const
-bool Type::is_const_struct_union() const {
+bool
+Type::is_const_struct_union() const
+{
 	if (!is_aggregate()) return false;
 	assert(fields.size() == qfers_.size());
 
@@ -393,8 +454,9 @@ bool Type::is_const_struct_union() const {
 	return false;
 }
 
-// 判断struct或union是否时volatile
-bool Type::is_volatile_struct_union() const {
+bool
+Type::is_volatile_struct_union() const
+{
 	if (!is_aggregate()) return false;
 	assert(fields.size() == qfers_.size());
 
@@ -410,8 +472,9 @@ bool Type::is_volatile_struct_union() const {
 	return false;
 }
 
-// 判断域中是否有int部分
-bool Type::has_int_field() const {
+bool
+Type::has_int_field() const
+{
 	if (is_int()) return true;
 	for (size_t i=0; i<fields.size(); ++i) {
 		const Type* t = fields[i];
@@ -420,13 +483,15 @@ bool Type::has_int_field() const {
 	return false;
 }
 
-// 判断有符号int类型是否有溢出的可能
-bool Type::signed_overflow_possible() const {
+bool
+Type::signed_overflow_possible() const
+{
 	return eType == eSimple && is_signed() && ((int)SizeInBytes()) >= CGOptions::int_size();
 }
 
-// 获取所有ok的struct和union类型
-void Type::get_all_ok_struct_union_types(vector<Type *> &ok_types, bool no_const, bool no_volatile, bool need_int_field, bool bStruct) {
+void
+Type::get_all_ok_struct_union_types(vector<Type *> &ok_types, bool no_const, bool no_volatile, bool need_int_field, bool bStruct)
+{
 	vector<Type *>::iterator i;
 	for(i = AllTypes.begin(); i != AllTypes.end(); ++i) {
 		Type* t = (*i);
@@ -440,16 +505,30 @@ void Type::get_all_ok_struct_union_types(vector<Type *> &ok_types, bool no_const
 		ok_types.push_back(t);
 	}
 }
-// 为了在C++中具有volatile union。 我不确定我们是否需要那些
-//（如果不是，则足以在此处返回false）
-bool Type::if_struct_will_have_assign_ops() {
-	//随机选择struct是否具有赋值运算符（对于C ++）：
+
+bool 
+Type::if_struct_will_have_assign_ops()
+{
+	// randomly choose if the struct will have assign operators (for C++):
 	if (!CGOptions::lang_cpp())
 		return false;
 	return rnd_flipcoin(RegularVolatileProb);
 }
 
-const Type* Type::choose_random_struct_union_type(vector<Type *> &ok_types) {
+// To have volatile unions in C++. I am not sure if we need those
+// (If not, will be enough to return false here)
+bool
+Type::if_union_will_have_assign_ops()
+{
+	// randomly choose if the union will have assign operators (for C++):
+	if (!CGOptions::lang_cpp())
+		return false;
+	return rnd_flipcoin(RegularVolatileProb);
+}
+
+const Type*
+Type::choose_random_struct_union_type(vector<Type *> &ok_types)
+{
 	size_t sz = ok_types.size();
 	assert(sz > 0);
 
@@ -464,21 +543,24 @@ const Type* Type::choose_random_struct_union_type(vector<Type *> &ok_types) {
 	return rv_type;
 }
 
-// 选取随机指针类型
-const Type* Type::choose_random_pointer_type(void) {
+const Type*
+Type::choose_random_pointer_type(void)
+{
 	unsigned int index = rnd_upto(derived_types.size());
 	ERROR_GUARD(NULL);
 	return derived_types[index];
 }
 
-// 是否有指针类型
-bool Type::has_pointer_type(void) {
+bool
+Type::has_pointer_type(void)
+{
 	return derived_types.size() > 0;
 }
 
 /* for exhaustive mode only */
-// 从type中随机选择结构体
-const Type* Type::choose_random_struct_from_type(const Type* type, bool no_volatile) {
+const Type*
+Type::choose_random_struct_from_type(const Type* type, bool no_volatile)
+{
 	if (!type)
 		return NULL;
 
@@ -1871,3 +1953,13 @@ Type::doFinalization(void)
 		delete (*j);
 	derived_types.clear();
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+// Local Variables:
+// c-basic-offset: 4
+// tab-width: 4
+// End:
+
+// End of file.

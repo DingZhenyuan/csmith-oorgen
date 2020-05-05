@@ -11,6 +11,7 @@ template <class Container>
 class SequenceLineParser {
 public:
 	SequenceLineParser();
+
 	~SequenceLineParser();
 
 	static bool parse_sequence(Container &q, const std::string &seq, const char sep_char = ',');
@@ -20,14 +21,20 @@ private:
 };
 
 template <class Container>
-SequenceLineParser<Container>::SequenceLineParser() {}
+SequenceLineParser<Container>::SequenceLineParser()
+{
+
+}
 
 template <class Container>
-SequenceLineParser<Container>::~SequenceLineParser() {}
+SequenceLineParser<Container>::~SequenceLineParser()
+{
 
-// 将字符串按照特定的字符分割开，并将分割后的子串转换成int，存入q中
-template <class Container>
-bool SequenceLineParser<Container>::parse_sequence(Container &q, const std::string &seq, const char sep_char) {
+}
+
+template <class Container> bool
+SequenceLineParser<Container>::parse_sequence(Container &q, const std::string &seq, const char sep_char)
+{
 	size_t pos = 0;
 	size_t start_pos = 0;
 
@@ -40,17 +47,18 @@ bool SequenceLineParser<Container>::parse_sequence(Container &q, const std::stri
 		pos = seq.find_first_of(sep_char, pos);
 		std::string s = seq.substr(start_pos, (pos - start_pos));
 		int i = SequenceLineParser::str2int(s);
-		if (i < 0) return false;
+		if (i < 0)
+			return false;
 		q.push_back(i);
-		if (pos == string::npos) break;
+		if (pos == string::npos)
+			break;
 		pos++;
 	}
 	return true;
 }
 
-// 将string转成int值
-template <class Container>
-int SequenceLineParser<Container>::str2int(const std::string &s)
+template <class Container> int
+SequenceLineParser<Container>::str2int(const std::string &s)
 {
 	stringstream ss(s);
 	int i = -1;

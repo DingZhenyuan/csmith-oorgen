@@ -1,3 +1,4 @@
+
 #if HAVE_CONFIG_H
 #  include <config.h>
 #endif
@@ -6,5 +7,12 @@
 
 int Error::r_error_ = SUCCESS;
 
-Error::Error() {}
-Error::~Error() {}
+Error::Error()
+{
+
+}
+
+Error::~Error()
+{
+
+}

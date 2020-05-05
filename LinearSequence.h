@@ -9,6 +9,7 @@
 class LinearSequence : public Sequence {
 public:
 	explicit LinearSequence(const char sep_char);
+
 	virtual ~LinearSequence();
 
 	virtual void init_sequence();
@@ -26,8 +27,8 @@ public:
 	virtual void get_sequence(std::ostream &);
 
 	virtual char get_sep_char() const { return sep_char_; }
-    // 默认分隔符为下划线'_'
-    static const char default_sep_char;
+
+	static const char default_sep_char;
 
 private:
 	std::map<int, int> seq_map_;

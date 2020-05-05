@@ -7,7 +7,7 @@
 #include <ostream>
 #include <vector>
 #include "CommonMacros.h"
-// #include "StatementAssign.h"
+#include "StatementAssign.h"
 #include "CVQualifiers.h"
 
 template <class Name> class Enumerator;
@@ -15,7 +15,9 @@ using namespace std;
 
 #define SIZE_UNKNOWN 0xFFFF
 
-// 四种Type类型：simple，pointer,union,struct
+/*
+ *
+ */
 enum eTypeDesc
 {
 	eSimple,
@@ -23,10 +25,11 @@ enum eTypeDesc
 	eUnion,
     eStruct,
 };
-// Type种类的个数
 #define MAX_TYPE_DESC ((eTypeDesc) (eStruct+1))
 
-// simple的type类型
+/*
+ *
+ */
 enum eSimpleType
 {
 	eVoid,
@@ -43,10 +46,8 @@ enum eSimpleType
 	// eDouble,
 	eULongLong,
 };
-// simple types的种类个数
 #define MAX_SIMPLE_TYPES ((eSimpleType) (eULongLong+1))
 
-// 匹配类型
 enum eMatchType
 {
 	eExact,
@@ -235,7 +236,6 @@ public:
 	const Type *ptr_type;
 	eSimpleType simple_type;
 	vector<unsigned int> dimensions;    // for array types
-	
 	vector<const Type*> fields;         // for struct/union types
 	unsigned int sid;                   // sequence id, for struct/union types
 
@@ -271,3 +271,10 @@ void OutputStructUnion(Type* type, std::ostream &out);
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // TYPE_H
+
+// Local Variables:
+// c-basic-offset: 4
+// tab-width: 4
+// End:
+
+// End of file.

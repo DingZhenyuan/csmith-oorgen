@@ -15,32 +15,48 @@
 #include "DepthSpec.h"
 #include "Enumerator.h"
 
-// wildcard和accept_stricter默认为false
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 CVQualifiers::CVQualifiers(void)
-: wildcard(false), accept_stricter(false) {}
+: wildcard(false),
+  accept_stricter(false)
+{
+	// nothing else to do
+}
 
 CVQualifiers::CVQualifiers(bool wild, bool accept_stricter)
-: wildcard(wild), accept_stricter(accept_stricter) {}
-
+: wildcard(wild),
+  accept_stricter(accept_stricter)
+{
+	// nothing else to do
+}
 
 CVQualifiers::CVQualifiers(const vector<bool>& isConsts, const vector<bool>& isVolatiles)
 : wildcard(false),
   accept_stricter(false),
   is_consts(isConsts),
   is_volatiles(isVolatiles)
-{}
+{
+	// nothing else to do
+}
 
-// 用已有的CVQualifiers为新创建的对象赋值
 CVQualifiers::CVQualifiers(const CVQualifiers &qfer)
 : wildcard(qfer.wildcard),
   accept_stricter(qfer.accept_stricter),
   is_consts(qfer.get_consts()),
   is_volatiles(qfer.get_volatiles())
-{}
+{
+	// nothing else to do
+}
 
-CVQualifiers::~CVQualifiers() {}
+CVQualifiers::~CVQualifiers()
+{
+}
 
-CVQualifiers &CVQualifiers::operator=(const CVQualifiers &qfer) {
+CVQualifiers &
+CVQualifiers::operator=(const CVQualifiers &qfer)
+{
 	if (this == &qfer) {
 		return *this;
 	}
@@ -51,12 +67,21 @@ CVQualifiers &CVQualifiers::operator=(const CVQualifiers &qfer) {
 	return *this;
 }
 
-// 比较此变量qfer比v更具有const-volatile性质
-// const 和 volatile都比没有更加具有
-// const volatile 比const更具有
-// const 并不比volatile更具有
-// ...
-bool CVQualifiers::stricter_than(const CVQualifiers& qfer) const {
+// --------------------------------------------------------------
+ /* return true if this variable is more const-volatile qualified than v
+  * some examples are:
+  *    const is more qualified than none
+  *    volatile is more qualified than none
+  *    const volatile is more qualified than const
+  *    const is NOT more qualified than volatile
+  *    ...
+  *  notice "const int**" is not convertable from "int**"
+  *  as explained in
+  * http://www.embedded.com/columns/programmingpointers/180205632?_requestid=488055
+  **************************************************************/
+bool
+CVQualifiers::stricter_than(const CVQualifiers& qfer) const
+{
 	size_t i;
 	assert(is_consts.size() == is_volatiles.size());
 	const vector<bool>& v_consts = qfer.get_consts();
@@ -98,7 +123,9 @@ bool CVQualifiers::stricter_than(const CVQualifiers& qfer) const {
 	return true;
 }
 
-bool CVQualifiers::match(const CVQualifiers& qfer) const {
+bool
+CVQualifiers::match(const CVQualifiers& qfer) const
+{
 	if (wildcard) {
 		return true;
 	}
@@ -113,7 +140,9 @@ bool CVQualifiers::match(const CVQualifiers& qfer) const {
 	return (!accept_stricter && stricter_than(qfer)) || (accept_stricter && qfer.stricter_than(*this));
 }
 
-bool CVQualifiers::match_indirect(const CVQualifiers& qfer) const {
+bool
+CVQualifiers::match_indirect(const CVQualifiers& qfer) const
+{
 	if (wildcard) {
 		return true;
 	}
@@ -127,24 +156,36 @@ bool CVQualifiers::match_indirect(const CVQualifiers& qfer) const {
 	return match(qfer.indirect_qualifiers(deref));
 }
 
-// 如果volatile_pointers为false，确保没有volatile指针
-void CVQualifiers::make_scalar_volatiles(std::vector<bool> &volatiles) {
+/*
+ * make sure no volatile-pointers if volatile-pointers is false
+ */
+void
+CVQualifiers::make_scalar_volatiles(std::vector<bool> &volatiles)
+{
 	if (!CGOptions::volatile_pointers() || !CGOptions::global_variables()) {
 		for (size_t i=1; i<volatiles.size(); i++)
 			volatiles[i] = false;
 	}
 }
 
-// 如果const_pointers，确保没有const指针
-void CVQualifiers::make_scalar_consts(std::vector<bool> &consts) {
+/*
+ * make sure no const-pointers if const_pointers is false
+ */
+void
+CVQualifiers::make_scalar_consts(std::vector<bool> &consts)
+{
 	if (!CGOptions::const_pointers()) {
 		for (size_t i=1; i<consts.size(); i++)
 			consts[i] = false;
 	}
 }
 
-// 生成任意的CV标识符，可以选择looser或stricter
-CVQualifiers CVQualifiers::random_qualifiers(bool no_volatile, Effect::Access access, const CGContext &cg_context) const {
+/*
+ * generate a random CV qualifier vector that is looser or stricter than this one
+ */
+CVQualifiers
+CVQualifiers::random_qualifiers(bool no_volatile, Effect::Access access, const CGContext &cg_context) const
+{
 	std::vector<bool> volatiles;
 	std::vector<bool> consts;
 	if (wildcard) {
@@ -175,8 +216,12 @@ CVQualifiers CVQualifiers::random_qualifiers(bool no_volatile, Effect::Access ac
 	return CVQualifiers(consts, volatiles);
 }
 
-// 生成任意的更looser的标识符
-CVQualifiers CVQualifiers::random_loose_qualifiers(bool no_volatile, Effect::Access access, const CGContext &cg_context) const {
+/*
+ * generate a random CV qualifier vector that is looser than this one
+ */
+CVQualifiers
+CVQualifiers::random_loose_qualifiers(bool no_volatile, Effect::Access access, const CGContext &cg_context) const
+{
 	std::vector<bool> volatiles;
 	std::vector<bool> consts;
 	if (wildcard) {
@@ -207,14 +252,15 @@ CVQualifiers CVQualifiers::random_loose_qualifiers(bool no_volatile, Effect::Acc
 	return CVQualifiers(consts, volatiles);
 }
 
-// 随机生成标识符
-CVQualifiers CVQualifiers::random_qualifiers(const Type* t, Effect::Access access,
-				const CGContext &cg_context, bool no_volatile) {
+CVQualifiers
+CVQualifiers::random_qualifiers(const Type* t, Effect::Access access,
+				const CGContext &cg_context, bool no_volatile)
+{
 	return random_qualifiers(t, access, cg_context, no_volatile, RegularConstProb, RegularVolatileProb);
 }
 
-// 判断是否可以volatile
-static bool is_volatile_ok_on_one_level(const Type* t) {
+static bool is_volatile_ok_on_one_level(const Type* t)
+{
 	if (!CGOptions::lang_cpp()) return true;
 	if (t->eType != eStruct && t->eType != eUnion) return true;
 
@@ -235,8 +281,10 @@ static bool is_volatile_ok_on_one_level(const Type* t) {
 	return true;
 }
 
-CVQualifiers CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGContext &cg_context, bool no_volatile,
-					unsigned int const_prob, unsigned int volatile_prob) {
+CVQualifiers
+CVQualifiers::random_qualifiers(const Type* t, Effect::Access access, const CGContext &cg_context, bool no_volatile,
+					unsigned int const_prob, unsigned int volatile_prob)
+{
 	CVQualifiers ret_qfer;
 	if (t==0) {
 		return ret_qfer;

@@ -1,5 +1,6 @@
 #ifndef COMMON_H
 #define COMMON_H
+///////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
 #include <functional>
@@ -9,9 +10,8 @@
 
 using std::string;
 using std::vector;
-using namespace std;
+using namespace std ;
 
-// 定义INT64在程序中的表示
 #ifdef WIN32
 #define INT64 __int64
 #else
@@ -20,6 +20,8 @@ using namespace std;
 
 #define BREAK_NOP {int i=0; i++;}
 
+// ----------------------------------------------------------------
+// Forward class declarations
 class Block;
 class Expression;
 class Function;
@@ -28,5 +30,13 @@ class Statement;
 class Type;
 class Variable;
 
+///////////////////////////////////////////////////////////////////////////////
 
 #endif // COMMON_H
+
+// Local Variables:
+// c-basic-offset: 4
+// tab-width: 4
+// End:
+
+// End of file.

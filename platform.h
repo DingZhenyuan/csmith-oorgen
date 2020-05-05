@@ -1,7 +1,19 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
+///////////////////////////////////////////////////////////////////////////////
+
 unsigned long platform_gen_seed();
+
 bool create_dir(const char* dir);
 
-#endif
+///////////////////////////////////////////////////////////////////////////////
+
+#endif // PLATFORM_H
+
+// Local Variables:
+// c-basic-offset: 4
+// tab-width: 4
+// End:
+
+// End of file.

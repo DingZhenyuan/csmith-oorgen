@@ -4,58 +4,44 @@
 #include <string>
 #include <vector>
 #include <map>
-
 #include "Reducer.h"
-
 using namespace std;
 
-// 这里设定所有的默认值
-// 函数最大个数
-#define CGOPTIONS_DEFAULT_MAX_FUNCS			(10)
-// 参数最大个数
-#define CGOPTIONS_DEFAULT_MAX_PARAMS		(5)
-// 第一个函数的参数最大个数
-#define CGOPTIONS_DEFAULT_FUNC1_MAX_PARAMS		(3)
-// 
-#define CGOPTIONS_DEFAULT_COVERAGE_TEST_SIZE	(500)
-//
-#define CGOPTIONS_DEFAULT_MAX_BLOCK_SIZE	(4)
-// 块的最大深度
-#define CGOPTIONS_DEFAULT_MAX_BLOCK_DEPTH	(5)
-// 表达式的最大深度
-#define CGOPTIONS_DEFAULT_MAX_EXPR_DEPTH	(10)
-// struct域的最大值
-#define CGOPTIONS_DEFAULT_MAX_STRUCT_FIELDS	(10)
-// union域的最大值
-#define CGOPTIONS_DEFAULT_MAX_UNION_FIELDS	(5)
-// struct嵌套水平
-#define CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL	(3)
-//
-#define CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL (5)
-// 数组最大维度数
-#define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3)
-// 数组每个维度的最大长度
-#define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION (10)
-// 数组的最大长度
-#define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH	(256)
-// 
-#define CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP	(4)
-// 
-#define CGOPTIONS_DEFAULT_MAX_EXHAUSTIVE_DEPTH	(-1)
+///////////////////////////////////////////////////////////////////////////////
 
-// 分文件的最大个数，0代表标准输出
+/*
+ * XXX --- Collect all the default values here.
+ *
+ * "static const int" still needs declared storage, so use #define's instead.
+ */
+#define CGOPTIONS_DEFAULT_MAX_FUNCS			(10)
+#define CGOPTIONS_DEFAULT_MAX_PARAMS		(5)
+#define CGOPTIONS_DEFAULT_FUNC1_MAX_PARAMS		(3)
+#define CGOPTIONS_DEFAULT_COVERAGE_TEST_SIZE	(500)
+#define CGOPTIONS_DEFAULT_MAX_BLOCK_SIZE	(4)
+#define CGOPTIONS_DEFAULT_MAX_BLOCK_DEPTH	(5)
+#define CGOPTIONS_DEFAULT_MAX_EXPR_DEPTH	(10)
+#define CGOPTIONS_DEFAULT_MAX_STRUCT_FIELDS	(10)
+#define CGOPTIONS_DEFAULT_MAX_UNION_FIELDS	(5)
+#define CGOPTIONS_DEFAULT_MAX_NESTED_STRUCT_LEVEL	(3)
+#define CGOPTIONS_DEFAULT_MAX_INDIRECT_LEVEL (5)
+#define CGOPTIONS_DEFAULT_MAX_ARRAY_DIMENSIONS	(3)
+#define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH_PER_DIMENSION (10)
+#define CGOPTIONS_DEFAULT_MAX_ARRAY_LENGTH	(256)
+#define CGOPTIONS_DEFAULT_MAX_ARRAY_NUM_IN_LOOP	(4)
+#define CGOPTIONS_DEFAULT_MAX_EXHAUSTIVE_DEPTH	(-1)
+// 0 means we output to the standard output
 #define CGOPTIONS_DEFAULT_MAX_SPLIT_FILES	(0)
-// 分文件的目录
 #define CGOPTIONS_DEFAULT_SPLIT_FILES_DIR	("./output")
-// 默认输出文件
 #define CGOPTIONS_DEFAULT_OUTPUT_FILE		("")
-// 平台配置文件
 #define PLATFORM_CONFIG_FILE                ("platform.info")
 
-
+/*
+ *
+ */
 class CGOptions {
 public:
-    static bool compute_hash(void);
+	static bool compute_hash(void);
 	static bool compute_hash(bool p);
 
 	static bool depth_protect(void);
@@ -451,19 +437,25 @@ public:
 	static bool enabled_builtin(const string &ks);
 
 	static void fix_options_for_cpp(void);
-    
-    static bool fast_execution(void);
-    static bool fast_execution(bool p);
+
+  static bool fast_execution(void);
+  static bool fast_execution(bool p);
 
 private:
-    static bool enabled_builtin_kind(const string &kind);
-    static void set_default_builtin_kinds();
-    static bool resolve_exhaustive_options();
-    static bool has_delta_conflict();
+	static bool enabled_builtin_kind(const string &kind);
+
+	static void set_default_builtin_kinds();
+
+	static bool resolve_exhaustive_options();
+
+	static bool has_delta_conflict();
+
 	static bool has_extension_conflict();
+
 	static void parse_string_options(string vname, vector<std::string> &v);
 
-    static bool	compute_hash_;
+	// Until I do this right, just make them all static.
+	static bool	compute_hash_;
 	static bool	depth_protect_;
 	static int	max_funcs_;
 	static int	max_split_files_;
@@ -590,16 +582,23 @@ private:
 	static bool vol_struct_union_fields_;
 	static bool const_struct_union_fields_;
 	static Reducer* reducer_;
-    static bool fast_execution_;
+  static bool fast_execution_;
 
 	// flag to indicate language
 	static bool lang_cpp_;
 	static bool cpp11_;
-
 private:
-    CGOptions(void);
-    CGOptions(CGOptions &cgo);
+	CGOptions(void);
+	CGOptions(CGOptions &cgo);
 };
 
-#endif
+///////////////////////////////////////////////////////////////////////////////
 
+#endif // CGOPTIONS_H
+
+// Local Variables:
+// c-basic-offset: 4
+// tab-width: 4
+// End:
+
+// End of file.
