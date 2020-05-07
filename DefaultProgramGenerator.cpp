@@ -16,6 +16,7 @@
 #include "CGOptions.h"
 #include "SafeOpFlags.h"
 #include "ExtensionMgr.h"
+#include "ModelReader.h"
 
 DefaultProgramGenerator::DefaultProgramGenerator(int argc, char *argv[], unsigned long seed)
 	: argc_(argc),
@@ -61,9 +62,16 @@ DefaultProgramGenerator::get_count_prefix(const std::string &)
 void
 DefaultProgramGenerator::goGenerator()
 {
+	// 读取model
+	vector<ClassType> classTypes;
+	ModelReader::Read(classTypes);
+	// ModelReader::printClasses(classTypes);
+	
+	// 打印头
 	output_mgr_->OutputHeader(argc_, argv_, seed_);
-
+	// 生成所有Types
 	GenerateAllTypes();
+	// 生成functions
 	GenerateFunctions();
 	output_mgr_->Output();
 	if (CGOptions::identify_wrappers()) {

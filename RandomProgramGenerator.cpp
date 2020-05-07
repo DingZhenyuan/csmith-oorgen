@@ -34,8 +34,7 @@ static unsigned long g_Seed = 0;
 
 // ----------------------------------------------------------------------------
 static void
-print_version(void)
-{
+print_version(void) {
 	// cout << PACKAGE_STRING << endl;
 	// cout << "Git version: " << git_version << endl;
 	// XXX print copyright, contact info, etc.?
@@ -43,16 +42,14 @@ print_version(void)
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-bool parse_string_arg(const char *arg, string &s)
-{
+bool parse_string_arg(const char *arg, string &s) {
 	s.assign(arg);
 	return ((!s.empty()) &&
 		(s.compare(0, 2, "--")));
 }
 
 static bool
-parse_int_arg(char *arg, unsigned long *ret)
-{
+parse_int_arg(char *arg, unsigned long *ret) {
 	int res;
 	res = sscanf (arg, "%lu", ret);
 
@@ -63,8 +60,7 @@ parse_int_arg(char *arg, unsigned long *ret)
 	return true;
 }
 
-static void print_help()
-{
+static void print_help() {
 	cout << "Command line options: " << endl << endl;
 	// most common options
 	cout << "  --help or -h: print this information." << endl << endl;
@@ -133,8 +129,7 @@ static void print_help()
 
 }
 
-static void print_advanced_help()
-{
+static void print_advanced_help() {
 	cout << "'Advanced' command line options that are probably only useful for Csmith's" << endl;
 	cout << "original developers:" << endl << endl;
 	// file split options
@@ -262,8 +257,8 @@ static void print_advanced_help()
 	cout << "  --strict-float: do not allow assignments between floats and integers" << endl << endl;
 }
 
-void arg_check(int argc, int i)
-{
+// arg数量检查
+void arg_check(int argc, int i) {
 	if (i >= argc) {
 		cout << "expect arg at pos " << i << std::endl;
 		exit(-1);
@@ -273,32 +268,35 @@ void arg_check(int argc, int i)
 
 // ----------------------------------------------------------------------------
 // 入口
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
+	// 生成随机种子
 	g_Seed = platform_gen_seed();
-
+	// 设置默认配置
 	CGOptions::set_default_settings();
 
 	for (int i=1; i<argc; i++) {
 
+		// 打印帮助信息
 		if (strcmp (argv[i], "--help") == 0 ||
 			strcmp (argv[i], "-h") == 0) {
 			print_help();
 			return 0;
 		}
 
+		// 打印更进一步的帮助信息
 		if (strcmp (argv[i], "-hh") == 0) {
 			print_advanced_help();
 			return 0;
 		}
 
+		// 打印版本
 		if (strcmp (argv[i], "--version") == 0 ||
 			strcmp (argv[i], "-v") == 0) {
 			print_version();
 			return 0;
 		}
 
+		// 设定seed
 		if (strcmp (argv[i], "--seed") == 0 ||
 			strcmp (argv[i], "-s") == 0) {
 			i++;
@@ -1376,10 +1374,12 @@ main(int argc, char **argv)
 		exit(-1);
 	}
 
+	// 生成cpp程序
 	if (CGOptions::lang_cpp()) {
 		CGOptions::fix_options_for_cpp();
 	}
 
+	// 检查指令矛盾
 	if (CGOptions::has_conflict()) {
 		cout << "error: options conflict - " << CGOptions::conflict_msg() << std::endl;
 		exit(-1);
@@ -1390,18 +1390,10 @@ main(int argc, char **argv)
 		cout << "error: can't create generator!" << std::endl;
 		exit(-1);
 	}
+	// 产生程序
 	generator->goGenerator();
 	delete generator;
 
 //	file.close();
 	return 0;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-// Local Variables:
-// c-basic-offset: 4
-// tab-width: 4
-// End:
-
-// End of file.

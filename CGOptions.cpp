@@ -477,9 +477,8 @@ CGOptions::allow_int64()
 			CGOptions::longlong());
 }
 
-bool
-CGOptions::has_conflict(void)
-{
+// 检查指令设置是否有矛盾
+bool CGOptions::has_conflict(void) {
 	if (CGOptions::has_random_based_conflict())
 		return true;
 

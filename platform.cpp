@@ -67,8 +67,8 @@ unsigned long platform_gen_seed()
 	return seed;
 }
 #else
-unsigned long platform_gen_seed()
-{
+// 读取long类型时间获取种子
+unsigned long platform_gen_seed() {
 	return (long) read_time();
 }
 #endif
