@@ -14,6 +14,8 @@ public:
 
     vector<ClassNode*> getParents() { return parents; }
     vector<ClassNode*> getChildren() { return children; }
+    void setMark(bool _mark) { mark = _mark; }
+    bool getMark() { return mark; }
 
     void addChildren(ClassNode* classNode);
 
@@ -33,6 +35,7 @@ public:
     vector<ClassNode*> getRoots() { return roots; }
     void addRoots(ClassNode* classNode);
     bool check();
+    void init(const vector<ClassType> classTypes);
     
 private:
     vector<ClassNode*> roots;

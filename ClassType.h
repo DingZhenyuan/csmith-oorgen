@@ -39,6 +39,7 @@ private:
     static int num;
     string name = "";
     bool abstract = false;
+    string parent;
     vector<SimpleAttribute> simpleAttributes;
 };
 

@@ -768,7 +768,8 @@ GenerateFunctions(void)
 		Function::initialize_builtin_functions();
 	// -----------------
 	// Create a basic first function, then generate a random graph from there.
-	/* Function *first = */ Function::make_first();
+	/* Function *first = */ 
+	Function::make_first();
 	ERROR_RETURN();
 
 	// -----------------

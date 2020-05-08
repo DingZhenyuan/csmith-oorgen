@@ -17,6 +17,7 @@
 #include "SafeOpFlags.h"
 #include "ExtensionMgr.h"
 #include "ModelReader.h"
+#include "InheritTree.h"
 
 DefaultProgramGenerator::DefaultProgramGenerator(int argc, char *argv[], unsigned long seed)
 	: argc_(argc),
@@ -66,6 +67,13 @@ DefaultProgramGenerator::goGenerator()
 	vector<ClassType> classTypes;
 	ModelReader::Read(classTypes);
 	// ModelReader::printClasses(classTypes);
+
+	// 构造继承关系树
+	InheritTree* inheritTree = new InheritTree();
+	inheritTree->init(classTypes);
+
+
+	
 	// 打印头
 	output_mgr_->OutputHeader(argc_, argv_, seed_);
 	// 生成所有Types
