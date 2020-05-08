@@ -220,9 +220,7 @@ OutputMgr::OutputTail(std::ostream &out)
 	}
 }
 
-void
-OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
-{
+void OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed) {
 	std::ostream &out = get_main_out();
 	if (CGOptions::concise()) {
 		out << "// Options:  ";

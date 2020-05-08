@@ -66,7 +66,6 @@ DefaultProgramGenerator::goGenerator()
 	vector<ClassType> classTypes;
 	ModelReader::Read(classTypes);
 	// ModelReader::printClasses(classTypes);
-	
 	// 打印头
 	output_mgr_->OutputHeader(argc_, argv_, seed_);
 	// 生成所有Types
