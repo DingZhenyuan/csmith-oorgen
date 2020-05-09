@@ -17,6 +17,8 @@
 #include "DepthSpec.h"
 #include "Enumerator.h"
 
+#include <fstream>
+
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1902,6 +1904,19 @@ OutputStructUnionDeclarations(std::ostream &out)
         Type* t = AllTypes[i];
         if (t->used && (t->eType == eStruct || t->eType == eUnion)) {
             OutputStructUnion(AllTypes[i], out);
+        }
+    }
+}
+
+// 新打印struct声明
+void OutputStructUnionDeclarationsClass(ofstream out_c) {
+	size_t i;
+	// output_comment_line(out_c, "--- Struct/Union Declarations ---")
+	for (i=0; i<AllTypes.size(); i++)
+    {
+        Type* t = AllTypes[i];
+        if (t->used && (t->eType == eStruct || t->eType == eUnion)) {
+            OutputStructUnion(AllTypes[i], out_c);
         }
     }
 }

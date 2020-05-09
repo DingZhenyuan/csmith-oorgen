@@ -785,6 +785,33 @@ GenerateFunctions(void)
 	ExtensionMgr::GenerateValues();
 }
 
+// 新的生成函数方法
+void Function::GenerateMemberFunction(int funcIndex, int funcNum) {
+	FactMgr::add_interested_facts(CGOptions::interested_facts());
+	if (CGOptions::builtins())
+		Function::initialize_builtin_functions();
+	if (funcIndex == 0) {
+		Function::make_first();
+		ERROR_RETURN();
+		for (cur_func_idx = 0; cur_func_idx < funcNum; cur_func_idx++) {
+			// Dynamically adds new functions to the end of the list..
+			if (FuncList[cur_func_idx]->is_built() == false) {
+				FuncList[cur_func_idx]->GenerateBody(CGContext::get_empty_context());
+				ERROR_RETURN();
+			}
+		}
+	} else {
+		for (cur_func_idx = funcIndex; cur_func_idx < funcIndex + funcNum; cur_func_idx++) {
+			// Dynamically adds new functions to the end of the list..
+			if (FuncList[cur_func_idx]->is_built() == false) {
+				FuncList[cur_func_idx]->GenerateBody(CGContext::get_empty_context());
+				ERROR_RETURN();
+			}
+		}
+	}	
+}
+
+
 /*
  *
  */
@@ -878,13 +905,3 @@ Function::~Function()
 		ret_c = NULL;
 	}
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-// Local Variables:
-// c-basic-offset: 4
-// tab-width: 4
-// End:
-
-// End of file.

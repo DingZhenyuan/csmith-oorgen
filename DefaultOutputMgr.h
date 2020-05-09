@@ -21,6 +21,9 @@ public:
 
 	virtual void Output();
 
+	// 新输出函数
+	void OutputFunc(ofstream &out_c);
+
 	virtual void outputln(ostream &out);
 
 	virtual void output_comment_line(ostream &out, const std::string &comment);

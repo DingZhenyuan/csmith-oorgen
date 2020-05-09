@@ -25,6 +25,9 @@ class Function
 {
 public:
 	friend void GenerateFunctions(void);
+	
+	// 新的生成函数方法
+	static void GenerateMemberFunction(int funcIndex, int funcNum);
 
 	~Function();
 

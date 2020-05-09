@@ -168,6 +168,18 @@ DefaultOutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed)
 	OutputMgr::OutputHeader(argc, argv, seed);
 }
 
+// 新的Output
+void DefaultOutputMgr::OutputFunc(ofstream &out_c) {
+	if (DeltaMonitor::is_running() && (Error::get_error() != SUCCESS)) {
+		out_c << "Delta reduction error!\n";
+	}
+	OutputStructUnionDeclarationsClass(out_c);
+	OutputGlobalVariablesClass(out_c);
+	OutputForwardDeclarationsClass(out_c);
+	OutputFunctionsClass(out_c);
+}
+
+
 void
 DefaultOutputMgr::Output()
 {

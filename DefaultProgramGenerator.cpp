@@ -73,6 +73,8 @@ DefaultProgramGenerator::goGenerator()
 	InheritTree* inheritTree = new InheritTree();
 	inheritTree->init(classTypes);
 
+	// 每个文件中生成function的个数
+	int funcNumPerClass = FuncListSize()/classTypes.size();
 	// 分文件打印输出
 	for (int i = 0; i < classTypes.size(); i++) {
 		ofstream out_c("codes/" + classTypes[i].getName() + ".cpp");
@@ -82,9 +84,11 @@ DefaultProgramGenerator::goGenerator()
 		output_mgr_->OutputHeaderClass(argc_, argv_, seed_, out_c);
 		output_mgr_->OutputClass(classTypes[i], out_c);
 		GenerateAllTypes();
-		GenerateFunctions();
-		GenerateMemberFunction();
 
+		// 按类生成function
+		Function::GenerateMemberFunction(funcNumPerClass * i, funcNumPerClass);
+		output_mgr_->Output();
+		output_mgr_->OutputFunc(out_c);
 
 		out_c.close();
 	}

@@ -268,6 +268,8 @@ void OutputStructUnionDeclarations(std::ostream &);
 void OutputStructAssignOps(Type* type, std::ostream &out, bool vol);
 void OutputStructUnion(Type* type, std::ostream &out);
 
+void OutputStructUnionDeclarationsClass(ofstream out_c);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // TYPE_H
