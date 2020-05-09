@@ -179,8 +179,7 @@ DefaultOutputMgr::Output()
 		OutputGlobals();
 		OutputAllHeaders();
 		RandomOutputDefs();
-	}
-	else {
+	} else {
 		OutputStructUnionDeclarations(out);
 		OutputGlobalVariables(out);
 		OutputForwardDeclarations(out);

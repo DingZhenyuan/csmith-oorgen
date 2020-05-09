@@ -5,6 +5,7 @@
 #include "DefaultProgramGenerator.h"
 #include <cassert>
 #include <sstream>
+#include <fstream>
 #include "RandomNumber.h"
 #include "AbsRndNumGenerator.h"
 #include "DefaultOutputMgr.h"
@@ -72,19 +73,32 @@ DefaultProgramGenerator::goGenerator()
 	InheritTree* inheritTree = new InheritTree();
 	inheritTree->init(classTypes);
 
+	// 分文件打印输出
+	for (int i = 0; i < classTypes.size(); i++) {
+		ofstream out_c("codes/" + classTypes[i].getName() + ".cpp");
+		// out_c << "hello" << endl;
+		
+		// 打印头
+		output_mgr_->OutputHeaderClass(argc_, argv_, seed_, out_c);
+		output_mgr_->OutputClass(classTypes[i], out_c);
+		GenerateAllTypes();
+		GenerateFunctions();
+		GenerateMemberFunction();
 
-	
-	// 打印头
-	output_mgr_->OutputHeader(argc_, argv_, seed_);
-	// 生成所有Types
-	GenerateAllTypes();
-	// 生成functions
-	GenerateFunctions();
-	output_mgr_->Output();
-	if (CGOptions::identify_wrappers()) {
-		ofstream ofile;
-		ofile.open("wrapper.h");
-		ofile << "#define N_WRAP " << SafeOpFlags::wrapper_names.size() << std::endl;
-		ofile.close();
+
+		out_c.close();
 	}
+	
+	// output_mgr_->OutputHeader(argc_, argv_, seed_);
+	// // 生成所有Types
+	// GenerateAllTypes();
+	// // 生成functions
+	// GenerateFunctions();
+	// output_mgr_->Output();
+	// if (CGOptions::identify_wrappers()) {
+	// 	ofstream ofile;
+	// 	ofile.open("wrapper.h");
+	// 	ofile << "#define N_WRAP " << SafeOpFlags::wrapper_names.size() << std::endl;
+	// 	ofile.close();
+	// }
 }

@@ -27,6 +27,10 @@ public:
     // abstract
     void setAbstract(bool _abstract) { abstract = _abstract; };
     bool getAbstract() { return abstract; }
+    // parent
+    void setParent(string _parent) { parent = _parent; }
+    string getParent() { return parent; }
+
     // 获取本class的attributes
     vector<SimpleAttribute> getAttributes() { return simpleAttributes; }
     
@@ -39,7 +43,7 @@ private:
     static int num;
     string name = "";
     bool abstract = false;
-    string parent;
+    string parent = "";
     vector<SimpleAttribute> simpleAttributes;
 };
 

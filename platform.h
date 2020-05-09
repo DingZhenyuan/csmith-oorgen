@@ -10,10 +10,3 @@ bool create_dir(const char* dir);
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // PLATFORM_H
-
-// Local Variables:
-// c-basic-offset: 4
-// tab-width: 4
-// End:
-
-// End of file.

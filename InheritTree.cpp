@@ -27,18 +27,6 @@ void InheritTree::addRoots(ClassNode* classNode) {
     }
 }
 
-// 队列节点定义
-typedef struct SeqNode {
-    ClassNode* classNode;
-    SeqNode* next;
-};
-
-// 队列定义
-typedef struct Sequence {
-    SeqNode* head;
-    SeqNode* tail;
-};
-
 // 创建队列
 Sequence* CreateSequence(ClassNode* root) {
     // 新建一个队列节点
@@ -134,7 +122,7 @@ bool InheritTree::check() {
         // 释放队列
         emptySequence(sequence);
 
-        Sequence* sequence = CreateSequence(roots[i]);
+        sequence = CreateSequence(roots[i]);
         // 广度优先恢复mark
         while(!isEmpty(sequence)) {
             ClassNode* classNode = popSeqNode(sequence);

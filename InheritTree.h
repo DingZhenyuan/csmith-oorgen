@@ -26,6 +26,18 @@ private:
     bool mark = false;
 };
 
+// 队列节点定义
+typedef struct SeqNode {
+    ClassNode* classNode;
+    SeqNode* next;
+};
+
+// 队列定义
+typedef struct Sequence {
+    SeqNode* head;
+    SeqNode* tail;
+};
+
 // 继承关系图
 class InheritTree {
 public:

@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <fstream>
 #include "Common.h"
 #include "CGOptions.h"
 #include "platform.h"
@@ -20,6 +21,8 @@
 #include "git_version.h"
 #include "random.h"
 #include "util.h"
+
+#include "ModelReader.h"
 
 const char *OutputMgr::hash_func_name = "csmith_compute_hash";
 
@@ -219,6 +222,118 @@ OutputMgr::OutputTail(std::ostream &out)
 		out << endl;
 	}
 }
+
+
+// 按类输出头文件
+void OutputMgr::OutputHeaderClass(int argc, char *argv[], unsigned long seed, ofstream &out_c) {
+	if (CGOptions::concise()) {
+		// concise模式
+		out_c << "// Options:  ";
+		if (argc <= 1) {
+			out_c << " (none)";
+		} else {
+			for (int i = 1; i < argc; ++i) {
+				out_c << " " << argv[i];
+			}
+		}
+		out_c << endl;
+	} else {
+		// 一般模式
+		out_c << "/*" << endl;
+		out_c << " * This is a RANDOMLY GENERATED PROGRAM." << endl;
+		out_c << " *" << endl;
+		out_c << " * Options:  ";
+		if (argc <= 1) {
+			out_c << " (none)";
+		} else {
+			for (int i = 1; i < argc; ++i) {
+				out_c << " " << argv[i];
+			}
+		}
+		out_c << endl;
+		out_c << " * Seed:      " << seed << endl;
+		out_c << " */" << endl;
+		out_c << endl;
+	}
+	
+	if (!CGOptions::longlong()) {
+		// 不允许long long则标注
+		out_c << endl;
+		out_c << "#define NO_LONGLONG" << std::endl;
+		out_c << endl;
+	}
+
+	if (CGOptions::enable_float()) {
+		// 允许float类型
+		out_c << "#include <float.h>\n";
+		out_c << "#include <math.h>\n";
+	}
+
+	ExtensionMgr::OutputHeader(out_c);
+
+	out_c << runtime_include << endl;
+
+ 	if (!CGOptions::compute_hash()) {
+		if (CGOptions::allow_int64())
+			out_c << "volatile uint64_t " << Variable::sink_var_name << " = 0;" << endl;
+		else
+			out_c << "volatile uint32_t " << Variable::sink_var_name << " = 0;" << endl;
+	}
+	out_c << endl;
+
+	out_c << "static long __undefined;" << endl;
+	out_c << endl;
+
+	// 深度保护
+	if (CGOptions::depth_protect()) {
+		out_c << "#define MAX_DEPTH (5)" << endl;
+		// Make depth signed, to cover our tails.
+		out_c << "int32_t DEPTH = 0;" << endl;
+		out_c << endl;
+	}
+
+	// out << platform_include << endl;
+	if (CGOptions::wrap_volatiles()) {
+		out_c << volatile_include << endl;
+	}
+
+	if (CGOptions::access_once()) {
+		out_c << access_once_macro << endl;
+	}
+
+	if (CGOptions::step_hash_by_stmt()) {
+		OutputMgr::OutputHashFuncDecl(out_c);
+		OutputMgr::OutputStepHashFuncDecl(out_c);
+	}
+}
+
+// 输出class定义
+void OutputMgr::OutputClass(ClassType classType, ofstream &out_c) {
+	// 输出类声明
+	if (classType.getParent() == "" && classType.getAbstract() == false) {
+		out_c << "class " << classType.getName() << " {" << endl;
+	} else if(classType.getAbstract()) {
+		out_c << "virtual class " << classType.getName() << " {" << endl;
+	} else if (classType.getParent() != "") {
+		out_c << "class " << classType.getName() << " : public " << classType.getParent() << " {" << endl;
+	} else {
+		cout << "error: virtual & parent!" << endl;
+	}
+
+	// 输出属性声明
+	vector<SimpleAttribute> simpleAttributes = classType.getAttributes();
+	for (int i = 0; i < simpleAttributes.size(); i++) {
+		if (simpleAttributes[i].value == "") {
+            out_c << "    " << ModelReader::SimpleTypeToStr(simpleAttributes[i].type) << " " << simpleAttributes[i].name << ";" << endl;
+        } else {
+            out_c << "    " << ModelReader::SimpleTypeToStr(simpleAttributes[i].type) << " " << simpleAttributes[i].name << " = " << simpleAttributes[i].value << ";" << endl;
+        }
+	}
+
+	// 类定义结束
+	out_c << "};" << endl;
+}
+
 
 void OutputMgr::OutputHeader(int argc, char *argv[], unsigned long seed) {
 	std::ostream &out = get_main_out();

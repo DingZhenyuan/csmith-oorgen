@@ -141,7 +141,7 @@ string ModelReader::SimpleTypeToStr(eSimpleType type) {
     }
 }
 
-// 分析一个标签的内容，并
+// 分析一个标签的内容
 void ModelReader::analyze(vector<string> v, vector<ClassType>& classTypes, int& state) {
     if (state == WAIT_STATE) {
         if (v[0] == "<eClassifiers" && v[1] == "xsi:type=\"ecore:EClass\"") {
@@ -164,9 +164,11 @@ void ModelReader::analyze(vector<string> v, vector<ClassType>& classTypes, int& 
                 map = splitString(v[3], "=");
                 map[1] = splitString(map[1], "\"")[1];
                 if (map[0] == "abstract") {
-                    ct->setAbstract(map[0] == "true" ? true : false);
+                    ct->setAbstract(map[1] == "true" ? true : false);
                 } else if (map[0] == "eSuperTypes") {
-                    // TODO:完成继承关系
+                    // 记录父类
+                    ct->setParent(map[1]);
+
                 } else {
                     cout << "error2" << endl;
                 }

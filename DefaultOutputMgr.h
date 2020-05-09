@@ -27,6 +27,11 @@ public:
 
 	virtual void output_tab(ostream &out, int indent);
 
+	// 设定输出
+	// void setOutput(ofstream fout) {
+	// 	*ofile_ = fout;
+	// }
+
 private:
 	explicit DefaultOutputMgr(std::ofstream *ofile);
 
@@ -54,6 +59,7 @@ private:
 
 	std::vector<std::ofstream* > outs;
 
+	// 输出out
 	std::ofstream *ofile_;
 };
 
