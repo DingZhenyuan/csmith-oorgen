@@ -79,12 +79,18 @@ void DefaultProgramGenerator::goGenerator() {
 
 	// 每个文件中生成function的个数
 	int funcNumPerClass = FuncListSize()/classTypes.size();
-	cout << FuncListSize() << endl;
-	cout << funcNumPerClass << endl;
+	// cout << FuncListSize() << endl;
+	// cout << funcNumPerClass << endl;
 	// 分文件打印输出
 	for (int i = 0; i < classTypes.size(); i++) {
+		int funcNum;
+		if (i < classTypes.size() - 1) {
+			funcNum = funcNumPerClass;
+		} else {
+			funcNum = FuncListSize() - funcNumPerClass * (i - 1);
+		}
+
 		ofstream out_c("codes/" + classTypes[i].getName() + ".cpp");
-		// out_c << "hello" << endl;
 		
 		// 打印头
 		output_mgr_->OutputHeaderClass(argc_, argv_, seed_, out_c);
@@ -93,7 +99,7 @@ void DefaultProgramGenerator::goGenerator() {
 		// Function::GenerateMemberFunction(funcNumPerClass * i, funcNumPerClass);
 		// output_mgr_->OutputFunc(out_c);
 		
-		output_mgr_->OutputFunc(funcNumPerClass * i, funcNumPerClass, out_c);
+		output_mgr_->OutputFunc(funcNumPerClass * i, funcNum, out_c);
 
 		out_c.close();
 	}
