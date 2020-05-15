@@ -471,4 +471,50 @@ OutputMgr::really_outputln(ostream &out)
 	out << std::endl;
 }
 
+// 新的Output
+void OutputMgr::OutputFunc(ofstream &out_c) {
+	// if (DeltaMonitor::is_running() && (Error::get_error() != SUCCESS)) {
+	// 	out_c << "Delta reduction error!\n";
+	// }
+	OutputStructUnionDeclarationsClass(out_c);
+	// OutputGlobalVariablesClass(out_c);
+	OutputForwardDeclarationsClass(out_c);
+	OutputFunctionsClass(out_c);
+
+	// if (CGOptions::step_hash_by_stmt()) {
+	// 	OutputMgr::OutputHashFuncDef(out);
+	// 	OutputMgr::OutputStepHashFuncDef(out);
+	// }
+
+	// 输出Main函数
+	
+	// if (!CGOptions::nomain())
+	// 	OutputMain(out);
+	// OutputTail(out);
+	// DeltaMonitor::Output(out);
+}
+
+// 新的Output
+void OutputMgr::OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c) {
+	// if (DeltaMonitor::is_running() && (Error::get_error() != SUCCESS)) {
+	// 	out_c << "Delta reduction error!\n";
+	// }
+	OutputStructUnionDeclarationsClass(out_c);
+	// OutputGlobalVariablesClass(out_c);
+	OutputForwardDeclarationsClass(out_c);
+	OutputFunctionsClass(funcIndex, funcNumPerClass, out_c);
+
+	// if (CGOptions::step_hash_by_stmt()) {
+	// 	OutputMgr::OutputHashFuncDef(out);
+	// 	OutputMgr::OutputStepHashFuncDef(out);
+	// }
+
+	// 输出Main函数
+	
+	// if (!CGOptions::nomain())
+	// 	OutputMain(out);
+	// OutputTail(out);
+	// DeltaMonitor::Output(out);
+}
+
 //////////////////////////////////////////////////////////////////

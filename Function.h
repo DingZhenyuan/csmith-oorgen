@@ -111,7 +111,16 @@ Function *GetFirstFunction(void);
 // unsigned
 long FuncListSize(void);
 void OutputForwardDeclarations(std::ostream &out);
+
+// 新的输出函数声明的方法
+void OutputForwardDeclarationsClass(std::ofstream &out_c);
+
 void OutputFunctions(std::ostream &out);
+
+// 新的输出函数体的方法
+void OutputFunctionsClass(std::ofstream &out_c);
+// 新的输出函数体的方法
+void OutputFunctionsClass(int funcIndex, int funcNumPerClass, std::ofstream &out_c);
 
 const std::vector<Function*>& get_all_functions(void);
 FactMgr* get_fact_mgr_for_func(const Function* func);

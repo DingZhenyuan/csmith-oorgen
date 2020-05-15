@@ -18,6 +18,7 @@
 #include "random.h"
 #include "DeltaMonitor.h"
 #include "Error.h"
+#include <fstream>
 
 static std::string filename_prefix = "rnd_output";
 
@@ -174,9 +175,21 @@ void DefaultOutputMgr::OutputFunc(ofstream &out_c) {
 		out_c << "Delta reduction error!\n";
 	}
 	OutputStructUnionDeclarationsClass(out_c);
-	OutputGlobalVariablesClass(out_c);
+	// OutputGlobalVariablesClass(out_c);
 	OutputForwardDeclarationsClass(out_c);
 	OutputFunctionsClass(out_c);
+
+	// if (CGOptions::step_hash_by_stmt()) {
+	// 	OutputMgr::OutputHashFuncDef(out);
+	// 	OutputMgr::OutputStepHashFuncDef(out);
+	// }
+
+	// 输出Main函数
+	
+	// if (!CGOptions::nomain())
+	// 	OutputMain(out);
+	// OutputTail(out);
+	// DeltaMonitor::Output(out);
 }
 
 

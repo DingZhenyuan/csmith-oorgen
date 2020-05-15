@@ -790,25 +790,25 @@ void Function::GenerateMemberFunction(int funcIndex, int funcNum) {
 	FactMgr::add_interested_facts(CGOptions::interested_facts());
 	if (CGOptions::builtins())
 		Function::initialize_builtin_functions();
-	if (funcIndex == 0) {
-		Function::make_first();
+	// -----------------
+	// Create a basic first function, then generate a random graph from there.
+	/* Function *first = */ 
+	Function::make_first();
+	ERROR_RETURN();
+
+	// -----------------
+	// Create body of each function, continue until no new functions are created.
+	for (cur_func_idx = 0; cur_func_idx < FuncListSize(); cur_func_idx++) {
+		// Dynamically adds new functions to the end of the list..
+		// if (FuncList[cur_func_idx]->is_built() == false) {
+		// 	FuncList[cur_func_idx]->GenerateBody(CGContext::get_empty_context());
+		// 	ERROR_RETURN();
+		// }
+		FuncList[cur_func_idx]->GenerateBody(CGContext::get_empty_context());
 		ERROR_RETURN();
-		for (cur_func_idx = 0; cur_func_idx < funcNum; cur_func_idx++) {
-			// Dynamically adds new functions to the end of the list..
-			if (FuncList[cur_func_idx]->is_built() == false) {
-				FuncList[cur_func_idx]->GenerateBody(CGContext::get_empty_context());
-				ERROR_RETURN();
-			}
-		}
-	} else {
-		for (cur_func_idx = funcIndex; cur_func_idx < funcIndex + funcNum; cur_func_idx++) {
-			// Dynamically adds new functions to the end of the list..
-			if (FuncList[cur_func_idx]->is_built() == false) {
-				FuncList[cur_func_idx]->GenerateBody(CGContext::get_empty_context());
-				ERROR_RETURN();
-			}
-		}
-	}	
+	}
+	FactPointTo::aggregate_all_pointto_sets();
+	ExtensionMgr::GenerateValues();
 }
 
 
@@ -845,6 +845,17 @@ OutputForwardDeclarations(std::ostream &out)
 			 std::bind2nd(std::ptr_fun(OutputForwardDecl), &out));
 }
 
+// 新的输出函数声明的方法
+void OutputForwardDeclarationsClass(std::ofstream &out_c) {
+	// 换行
+	out_c << endl;
+	out_c << endl;
+	// 输出声明标识
+	out_c << "/*--- FORWARD DECLARATIONS ---*/" << endl;
+	// 输出生成的function
+	for_each(FuncList.begin(), FuncList.end(), std::bind2nd(std::ptr_fun(OutputForwardDecl), &out_c));
+}
+
 /*
  *
  */
@@ -856,6 +867,31 @@ OutputFunctions(std::ostream &out)
 	output_comment_line(out, "--- FUNCTIONS ---");
 	for_each(FuncList.begin(), FuncList.end(),
 			 std::bind2nd(std::ptr_fun(OutputFunction), &out));
+}
+
+// 新的输出函数体的方法
+void OutputFunctionsClass(std::ofstream &out_c) {
+	// 换行
+	out_c << endl;
+	out_c << endl;
+	// 输出声明标识
+	out_c << "/*--- FORWARD DECLARATIONS ---*/" << endl;
+	for_each(FuncList.begin(), FuncList.end(),
+			 std::bind2nd(std::ptr_fun(OutputFunction), &out_c));
+}
+
+// 新的输出函数体的方法
+void OutputFunctionsClass(int funcIndex, int funcNumPerClass, std::ofstream &out_c) {
+	// 换行
+	out_c << endl;
+	out_c << endl;
+	// 输出声明标识
+	out_c << "/*--- FORWARD DECLARATIONS ---*/" << endl;
+	for (int i = funcIndex; i < funcIndex + funcNumPerClass; i++) {
+		OutputFunction(FuncList[i], &out_c);
+	}
+	// for_each(FuncList.begin(), FuncList.end(),
+	// 		 std::bind2nd(std::ptr_fun(OutputFunction), &out_c));
 }
 
 /*

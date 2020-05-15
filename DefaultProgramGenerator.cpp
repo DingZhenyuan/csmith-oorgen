@@ -61,9 +61,7 @@ DefaultProgramGenerator::get_count_prefix(const std::string &)
 	return "";
 }
 
-void
-DefaultProgramGenerator::goGenerator()
-{
+void DefaultProgramGenerator::goGenerator() {
 	// 读取model
 	vector<ClassType> classTypes;
 	ModelReader::Read(classTypes);
@@ -73,8 +71,16 @@ DefaultProgramGenerator::goGenerator()
 	InheritTree* inheritTree = new InheritTree();
 	inheritTree->init(classTypes);
 
+	// 生成所有Types
+	GenerateAllTypes();
+
+	// 生成所有Functions
+	GenerateFunctions();
+
 	// 每个文件中生成function的个数
 	int funcNumPerClass = FuncListSize()/classTypes.size();
+	cout << FuncListSize() << endl;
+	cout << funcNumPerClass << endl;
 	// 分文件打印输出
 	for (int i = 0; i < classTypes.size(); i++) {
 		ofstream out_c("codes/" + classTypes[i].getName() + ".cpp");
@@ -83,12 +89,11 @@ DefaultProgramGenerator::goGenerator()
 		// 打印头
 		output_mgr_->OutputHeaderClass(argc_, argv_, seed_, out_c);
 		output_mgr_->OutputClass(classTypes[i], out_c);
-		GenerateAllTypes();
 
-		// 按类生成function
-		Function::GenerateMemberFunction(funcNumPerClass * i, funcNumPerClass);
-		output_mgr_->Output();
-		output_mgr_->OutputFunc(out_c);
+		// Function::GenerateMemberFunction(funcNumPerClass * i, funcNumPerClass);
+		// output_mgr_->OutputFunc(out_c);
+		
+		output_mgr_->OutputFunc(funcNumPerClass * i, funcNumPerClass, out_c);
 
 		out_c.close();
 	}

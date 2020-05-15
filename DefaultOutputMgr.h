@@ -20,8 +20,7 @@ public:
 	virtual void OutputHeader(int argc, char *argv[], unsigned long seed);
 
 	virtual void Output();
-
-	// 新输出函数
+	// 新的输出函数
 	void OutputFunc(ofstream &out_c);
 
 	virtual void outputln(ostream &out);

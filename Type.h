@@ -10,6 +10,8 @@
 #include "StatementAssign.h"
 #include "CVQualifiers.h"
 
+#include <fstream>
+
 template <class Name> class Enumerator;
 using namespace std;
 
@@ -268,7 +270,7 @@ void OutputStructUnionDeclarations(std::ostream &);
 void OutputStructAssignOps(Type* type, std::ostream &out, bool vol);
 void OutputStructUnion(Type* type, std::ostream &out);
 
-void OutputStructUnionDeclarationsClass(ofstream out_c);
+void OutputStructUnionDeclarationsClass(ofstream &out_c);
 
 ///////////////////////////////////////////////////////////////////////////////
 

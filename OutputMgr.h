@@ -47,6 +47,10 @@ public:
 	virtual void OutputStructUnions(ostream& /* out */) {};
 
 	virtual void Output() = 0;
+	// 新的输出函数
+	virtual void OutputFunc(ofstream &out_c);
+	// 新的输出函数
+	virtual void OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c);
 
 	virtual void outputln(ostream &out) {out << std::endl;}
 
