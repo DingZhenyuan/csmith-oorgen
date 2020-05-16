@@ -90,10 +90,10 @@ void DefaultProgramGenerator::goGenerator() {
 			funcNum = FuncListSize() - funcNumPerClass * i;
 		}
 
-		ofstream out_c("codes/" + classTypes[i].getName() + ".cpp");
+		ofstream out_c("codes/" + classTypes[i].getName() + ".h");
 		
 		// 打印头
-		output_mgr_->OutputHeaderClass(argc_, argv_, seed_, out_c);
+		output_mgr_->OutputHeaderClass(argc_, argv_, seed_, out_c, classTypes, classTypes[i].getName());
 		output_mgr_->OutputClass(classTypes[i], out_c);
 
 		// Function::GenerateMemberFunction(funcNumPerClass * i, funcNumPerClass);
@@ -110,7 +110,7 @@ void DefaultProgramGenerator::goGenerator() {
 
 	ofstream out_c("codes/main.cpp");
 	// 输出main函数的头
-	output_mgr_->OutputHeaderClass(argc_, argv_, seed_, out_c);
+	output_mgr_->OutputHeaderClass(argc_, argv_, seed_, out_c, classTypes, "");
 
 	// 输出main函数相关
 	output_mgr_->OutputFunc(0, 0, out_c, false, true);

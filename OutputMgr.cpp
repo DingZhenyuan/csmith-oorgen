@@ -227,7 +227,7 @@ OutputMgr::OutputTail(std::ostream &out)
 
 
 // 按类输出头文件
-void OutputMgr::OutputHeaderClass(int argc, char *argv[], unsigned long seed, ofstream &out_c) {
+void OutputMgr::OutputHeaderClass(int argc, char *argv[], unsigned long seed, ofstream &out_c, vector<ClassType> classTypes, string self) {
 	if (CGOptions::concise()) {
 		// concise模式
 		out_c << "// Options:  ";
@@ -257,6 +257,11 @@ void OutputMgr::OutputHeaderClass(int argc, char *argv[], unsigned long seed, of
 		out_c << " */" << endl;
 		out_c << endl;
 	}
+
+	// 对于非main函数的文件，需要标注只需要编译一次
+	if (self != "") {
+		out_c << "#pragma once" << endl;
+	}
 	
 	if (!CGOptions::longlong()) {
 		// 不允许long long则标注
@@ -272,6 +277,14 @@ void OutputMgr::OutputHeaderClass(int argc, char *argv[], unsigned long seed, of
 	}
 
 	// 加入各class文件的头
+	for (int i = 0; i < classTypes.size(); i++) {
+		if (classTypes[i].getName() == self) {
+			continue;
+		}
+		else {
+			out_c << "#include \"" << classTypes[i].getName() << ".h\"" << endl;
+		}
+	}
 
 	ExtensionMgr::OutputHeader(out_c);
 

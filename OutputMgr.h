@@ -39,7 +39,7 @@ public:
 	virtual void OutputHeader(int argc, char *argv[], unsigned long seed) = 0;
 
 	// 输出头，按类文件
-	void OutputHeaderClass(int argc, char *argv[], unsigned long seed, ofstream &out_c);
+	void OutputHeaderClass(int argc, char *argv[], unsigned long seed, ofstream &out_c, vector<ClassType> classTypes, string self);
 
 	// 输出class定义
 	void OutputClass(ClassType classType, ofstream &out_c);
