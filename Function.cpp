@@ -179,6 +179,11 @@ FuncListSize(void)
 	return FuncList.size();
 }
 
+// 新方法，返回FuncList
+vector<Function*> getFuncList() {
+	return FuncList;
+}
+
 /*
  *
  */
@@ -493,12 +498,14 @@ Function::OutputHeader(std::ostream &out)
 		assert(return_type->eType != eStruct);
 	if (!CGOptions::return_unions() && return_type)
 		assert(return_type->eType != eUnion);
-	if (is_inlined)
-		out << "inline ";
-	// force functions to be static if necessary
-	if (CGOptions::force_globals_static()) {
-		out << "static ";
-	}
+
+	// 暂时取消inline标记和static标记，认为所有的成员函数都不是静态的
+	// if (is_inlined)
+	// 	out << "inline ";
+	// // force functions to be static if necessary
+	// if (CGOptions::force_globals_static()) {
+	// 	out << "static ";
+	// }
 	rv->qfer.output_qualified_type(return_type, out);
 	out << " " << get_prefixed_name(name) << "(";
 	OutputFormalParamList( out );

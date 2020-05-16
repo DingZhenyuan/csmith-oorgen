@@ -50,7 +50,7 @@ public:
 	// 新的输出函数
 	virtual void OutputFunc(ofstream &out_c);
 	// 新的输出函数
-	virtual void OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c, bool outVariable, bool outMain);
+	virtual void OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c, bool outVariable, bool outMain, vector<ClassType> classTypes);
 
 	// 输出main函数
 	// virtual void OutputMainFuct(std::ofstream &out);
@@ -77,6 +77,8 @@ protected:
 	void OutputTail(std::ostream &out);
 
 	void OutputMain(std::ostream &out);
+	// 新的OutputMain方法
+	void OutputMain(std::ostream &out, vector<ClassType> classTypes);
 
 private:
 

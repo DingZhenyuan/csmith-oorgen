@@ -110,6 +110,10 @@ void GenerateFunctions(void);
 Function *GetFirstFunction(void);
 // unsigned
 long FuncListSize(void);
+
+// 新方法，返回FuncList
+vector<Function*> getFuncList();
+
 void OutputForwardDeclarations(std::ostream &out);
 
 // 新的输出函数声明的方法

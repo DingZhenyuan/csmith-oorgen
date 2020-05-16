@@ -24,6 +24,7 @@
 #include "DeltaMonitor.h"
 
 #include "ModelReader.h"
+#include "ClassType.h"
 
 const char *OutputMgr::hash_func_name = "csmith_compute_hash";
 
@@ -140,6 +141,101 @@ OutputMgr::OutputMain(std::ostream &out)
 	delete invoke;
 }
 
+
+// 新的输出Main的方法
+void OutputMgr::OutputMain(std::ostream &out, vector<ClassType> classTypes)
+{
+	CGContext cg_context(GetFirstFunction() /* BOGUS -- not in first func. */,
+						 Effect::get_empty_effect(),
+						 0);
+
+	FunctionInvocation *invoke = NULL;
+	invoke = ExtensionMgr::MakeFuncInvocation(GetFirstFunction(), cg_context);
+	out << endl << endl;
+	output_comment_line(out, "----------------------------------------");
+
+	// 输出main函数参数列表
+	ExtensionMgr::OutputInit(out);
+
+	// 打印定义对象和调用方法
+	for (int i = 0; i < classTypes.size(); i++) {
+		if (!classTypes[i].getAbstract()) {
+			std::string className = classTypes[i].getName();
+			// 格式
+			out << "\t";
+			// 输出声明
+			out << classTypes[i].getName() << " " << "obj_" << className << ";" << endl;
+
+			// 调用函数
+			vector<Function*> functions = classTypes[i].getFunctions();
+			for (int j = 0; j < functions.size(); j++) {
+				int varNum = functions[j]->param.size();
+				out << "\tobj_" << className << "." << functions[j]->name << "(";
+				// 对于所有的引用变量均设为0
+				for (int k = 0; k < varNum; k++) {
+					if (k == 0) {
+						out << "0";
+					}
+					else {
+						out << ", 0";
+					}
+				}
+				out << ");" << endl;
+			}
+			out << endl;
+		}
+	}
+
+	// output initializers for global array variables
+	OutputArrayInitializers(*VariableSelector::GetGlobalVariables(), out, 1);
+
+	if (CGOptions::blind_check_global()) {
+		ExtensionMgr::OutputFirstFunInvocation(out, invoke);
+		std::vector<Variable *>& vars = *VariableSelector::GetGlobalVariables();
+		for (size_t i=0; i<vars.size(); i++) {
+			vars[i]->output_value_dump(out, "checksum ", 1);
+		}
+	}
+	else {
+		// set up a global variable that controls if we print the hash value after computing it for each global
+		out << "    int print_hash_value = 0;" << endl;
+		if (CGOptions::accept_argc()) {
+			out << "    if (argc == 2 && strcmp(argv[1], \"1\") == 0) print_hash_value = 1;" << endl;
+		}
+
+		out << "    platform_main_begin();" << endl;
+		if (CGOptions::compute_hash()) {
+			out << "    crc32_gentab();" << endl;
+		}
+
+		ExtensionMgr::OutputFirstFunInvocation(out, invoke);
+
+	#if 0
+		out << "    ";
+		invoke->Output(out);
+		out << ";" << endl;
+	#endif
+		// resetting all global dangling pointer to null per Rohit's request
+		if (!CGOptions::dangling_global_ptrs()) {
+			OutputPtrResets(out, GetFirstFunction()->dead_globals);
+		}
+
+		if (CGOptions::step_hash_by_stmt())
+			OutputMgr::OutputHashFuncInvocation(out, 1);
+		else
+			HashGlobalVariables(out);
+		if (CGOptions::compute_hash()) {
+			out << "    platform_main_end(crc32_context ^ 0xFFFFFFFFUL, print_hash_value);" << endl;
+		} else {
+			out << "    platform_main_end(0,0);" << endl;
+		}
+	}
+	ExtensionMgr::OutputTail(out);
+	out << "}" << endl;
+	delete invoke;
+}
+
+
 void
 OutputMgr::OutputHashFuncInvocation(std::ostream &out, int indent)
 {
@@ -184,6 +280,7 @@ OutputMgr::OutputStepHashFuncDef(std::ostream &out)
 	out << "crc32_gentab();" << endl;
 	out << "}" << std::endl;
 }
+
 
 void
 OutputMgr::OutputHashFuncDecl(std::ostream &out)
@@ -527,15 +624,14 @@ void OutputMgr::OutputFunc(ofstream &out_c) {
 }
 
 // 新的Output
-void OutputMgr::OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c, bool outVariable, bool outMain) {
+void OutputMgr::OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c, bool outVariable, bool outMain, vector<ClassType> classTypes) {
 	// if (DeltaMonitor::is_running() && (Error::get_error() != SUCCESS)) {
 	// 	out_c << "Delta reduction error!\n";
 	// }
 	
 	if (outMain) {
 		// 输出Main函数
-		if (!CGOptions::nomain())
-			OutputMain(out_c);
+		if (!CGOptions::nomain()) OutputMain(out_c, classTypes);
 		OutputTail(out_c);
 		DeltaMonitor::Output(out_c);
 	}

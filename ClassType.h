@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Type.h"
+#include "Function.h"
 
 using namespace std;
 
@@ -39,12 +40,18 @@ public:
     // 添加attributes，设置value
     void addAttribute(string name, eSimpleType type, string value);
 
+    // 添加function
+    void addFunction(Function* function) { functions.push_back(function); }
+    // 获得functions
+    vector<Function*> getFunctions() { return functions; }
+
 private:
     static int num;
     string name = "";
     bool abstract = false;
     string parent = "";
     vector<SimpleAttribute> simpleAttributes;
+    vector<Function*> functions;
 };
 
 #endif // CLASSTYPE_H
