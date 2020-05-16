@@ -818,6 +818,15 @@ MapVariableList(const vector<Variable*> &var, std::ostream &out,
 	for_each(var.begin(), var.end(), std::bind2nd(std::ptr_fun(func), &out));
 }
 
+void
+MapVariableList(const vector<Variable*> &var, std::ostream &out, string obj)
+{
+	// for_each(var.begin(), var.end(), std::bind2nd(std::ptr_fun(func), &out));
+	for (int i = 0; i < var.size(); i++) {
+		HashVariable(var[i], &out, obj);
+	}
+}
+
 // --------------------------------------------------------------
 void
 OutputArrayCtrlVars(const vector <const Variable*> &ctrl_vars, std::ostream &out, size_t dimen, int indent)
@@ -1000,12 +1009,69 @@ Variable::hash(std::ostream& out) const
 	}
 }
 
+void
+Variable::hash(std::ostream& out, string obj) const
+{
+	if (type->is_aggregate()) {
+        size_t i;
+		FactMgr* fm = get_fact_mgr_for_func(GetFirstFunction());
+		for (i=0; i<field_vars.size(); i++) {
+			if (type->eType == eUnion && !FactUnion::is_field_readable(this, i, fm->global_facts)) {
+				// don't read union fields that is not last written into or have possible padding bits
+				continue;
+			}
+			field_vars[i]->hash(out, obj);
+		}
+    }
+	else if (type->eType == eSimple) {
+		if (CGOptions::compute_hash()) {
+            // FIXME handle double here too, once we generate those
+            if (type->simple_type == eFloat) {
+                out << "    transparent_crc_bytes (&";
+				// 加入调用
+				out << obj;
+                Output(out);
+                out << ", sizeof(";
+                // 加入调用
+				out << obj;
+				Output(out);
+                out << "), \"" << obj << name << "\", print_hash_value);" << endl;
+            } else {
+                out << "    transparent_crc(";
+				// 加入调用
+				out << obj;
+                Output(out);
+                out << ", \"" << obj << name << "\", print_hash_value);" << endl;
+            }
+		}
+		else {
+			out << "    " << Variable::sink_var_name << " = ";
+			// 加入调用
+			out << obj;
+			Output(out);
+			out << ";" << endl;
+		}
+    }
+	else if (type->eType == ePointer) {
+	}
+}
+
+
+
 // --------------------------------------------------------------
 int
 HashVariable(Variable *var, std::ostream *pOut)
 {
 	std::ostream &out = *pOut;
 	var->hash(out);
+    return 0;
+}
+
+int
+HashVariable(Variable *var, std::ostream *pOut, string obj)
+{
+	std::ostream &out = *pOut;
+	var->hash(out, obj);
     return 0;
 }
 

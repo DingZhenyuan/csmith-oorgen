@@ -605,6 +605,21 @@ ArrayVariable::output_with_indices(std::ostream &out, const std::vector<const Va
 }
 
 void
+ArrayVariable::output_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs, std::string obj) const
+{
+	size_t i;
+	// out << get_actual_name();
+	// 输出加上对象调用
+	out << obj;
+	out << get_actual_name();
+	for (i=0; i<get_dimension(); i++) {
+		out << "[";
+		cvs[i]->Output(out);
+		out << "]";
+	}
+}
+
+void
 ArrayVariable::output_checksum_with_indices(std::ostream &out,
 					const std::vector<const Variable*>& cvs,
 					string field_name) const
@@ -659,6 +674,50 @@ ArrayVariable::output_init(std::ostream &out, const Expression* init, const vect
 	}
 	output_tab(out, indent+1);
 	output_with_indices(out, cvs);
+	out << " = ";
+	init->Output(out);
+	out << ";";
+	outputln(out);
+	// output the closing bracelets
+	for (i=1; i<get_dimension(); i++) {
+		indent--;
+		output_tab(out, indent);
+		out << "}";
+		outputln(out);
+	}
+}
+
+// 新的输出方法
+void ArrayVariable::output_init(std::ostream &out, const Expression* init, const vector<const Variable*>& cvs, int indent, string obj) const
+{
+	// indent++;
+	if (collective != 0) return;
+	size_t i;
+
+	for (i=0; i<get_dimension(); i++) {
+		if (i > 0) {
+			output_tab(out, indent);
+			out << "{";
+			outputln(out);
+			indent++;
+		}
+		output_tab(out, indent);
+		out << "for (";
+		out << cvs[i]->get_actual_name();
+		out << " = 0; ";
+		out << cvs[i]->get_actual_name();
+		out << " < " << sizes[i] << "; ";
+		out << cvs[i]->get_actual_name();
+		if (CGOptions::post_incr_operator()) {
+			out << "++)";
+		}
+		else {
+			out << " = " << cvs[i]->get_actual_name() << " + 1)";
+		}
+		outputln(out);
+	}
+	output_tab(out, indent+1);
+	output_with_indices(out, cvs, obj);
 	out << " = ";
 	init->Output(out);
 	out << ";";
@@ -727,6 +786,62 @@ ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string
 		output_close_encloser("}", out, indent);
 	}
 }
+
+void
+ArrayVariable::output_addr_checks(std::ostream &out, const Variable* var, string field_name, int indent, string obj) const
+{
+	size_t i;
+	vector<const Variable *> &ctrl_vars = Variable::get_new_ctrl_vars();
+	// declare control variables
+	OutputArrayCtrlVars(ctrl_vars, out, get_dimension(), indent);
+	for (i=0; i<get_dimension(); i++) {
+		output_tab(out, indent);
+		out << "for (";
+		out << ctrl_vars[i]->get_actual_name();
+		out << " = 0; ";
+		out << ctrl_vars[i]->get_actual_name();
+		out << " < " << sizes[i] << "; ";
+		out << ctrl_vars[i]->get_actual_name();
+		if (CGOptions::post_incr_operator()) {
+			out << "++)";
+		}
+		else {
+			out << " = " << ctrl_vars[i]->get_actual_name() << " + 1)";
+		}
+		outputln(out);
+		output_open_encloser("{", out, indent);
+	}
+	output_tab(out, indent);
+	out << "if (";
+	var->Output(out);
+	out << " == &";
+	output_with_indices(out, ctrl_vars, obj);
+	out << field_name;
+	out << ")" << endl;
+	output_open_encloser("{", out, indent);
+	output_tab(out, indent);
+	out << "printf(\"   ";
+	var->Output(out);
+	out << " = &";
+	out << get_actual_name();
+	for (i=0; i<get_dimension(); i++) {
+		out << "[%d]";
+	}
+	out << ";\\n\"";
+	for (i=0; i<get_dimension(); i++) {
+		out << ", ";
+		out << ctrl_vars[i]->get_actual_name();
+	}
+	out << ");" << endl;
+	output_tab(out, indent);
+	out << "break;";
+	output_close_encloser("}", out, indent);
+	// output the closing bracelets
+	for (i=0; i<get_dimension(); i++) {
+		output_close_encloser("}", out, indent);
+	}
+}
+
 
 string
 ArrayVariable::make_print_index_str(const vector<const Variable *> &cvs) const
@@ -823,6 +938,88 @@ ArrayVariable::hash(std::ostream& out) const
 			output_tab(out, indent);
 			out << Variable::sink_var_name << " = ";
 			output_with_indices(out, cvs);
+			out << ";";
+		}
+	}
+	// output the closing bracelets
+	for (i=0; i<get_dimension(); i++) {
+		output_close_encloser("}", out, indent);
+	}
+	outputln(out);
+}
+
+void ArrayVariable::hash(std::ostream& out, string obj) const
+{
+	if (collective != 0) return;
+	vector<string> field_names;
+	vector<const Type *> field_types;
+	vector<int> included_fields;
+	// for unions, find the fields that we don't want to hash due to union field read rules. So FactUnion.cpp
+	vector<int> excluded_fields;
+	if (type->eType == eUnion) {
+		FactMgr* fm = get_fact_mgr_for_func(GetFirstFunction());
+		assert(fm);
+		for (size_t i=0; i<field_vars.size(); i++) {
+			if (!FactUnion::is_field_readable(this, i, fm->global_facts)) {
+				excluded_fields.push_back(i);
+			}
+		}
+	}
+ 	type->get_int_subfield_names("", field_names, field_types, excluded_fields);
+	assert(field_names.size() == field_types.size());
+	// if not a suitable type for hashing, give up
+	if (field_names.size() == 0) return;
+
+	size_t i, j;
+	int indent = 1;
+	//ISSUE: ugly hack to make sure we use the latest ctrl_vars, which is generated
+	// from the call of OutputArrayInitializers in OutputMgr.cpp
+	const vector<const Variable*>& cvs = Variable::get_last_ctrl_vars();
+	for (i=0; i<get_dimension(); i++) {
+		output_tab(out, indent);
+		out << "for (";
+		out << cvs[i]->get_actual_name();
+		out << " = 0; ";
+		out << cvs[i]->get_actual_name();
+		out << " < " << sizes[i] << "; ";
+		out << cvs[i]->get_actual_name();
+		if (CGOptions::post_incr_operator()) {
+			out << "++)";
+		}
+		else {
+			out << " = " << cvs[i]->get_actual_name() << " + 1)";
+		}
+		outputln(out);
+		output_open_encloser("{", out, indent);
+	}
+	string vname;
+	ostringstream oss;
+	output_with_indices(oss, cvs, obj);
+	vname = oss.str();
+	if (CGOptions::compute_hash()) {
+		for (j=0; j<field_names.size(); j++) {
+			if (field_types[j]->eType == eSimple && field_types[j]->simple_type == eFloat) {
+				output_tab(out, indent);
+				out << "transparent_crc_bytes(&" << vname << field_names[j] << ", ";
+				out << "sizeof(" << vname << field_names[j] << "), ";
+				out << "\"" << vname << field_names[j] << "\", print_hash_value);" << endl;
+			} else {
+				output_tab(out, indent);
+				out << "transparent_crc(" << vname << field_names[j] << ", \"";
+				out << vname << field_names[j] << "\", print_hash_value);" << endl;
+			}
+		}
+		// print the index value
+		if (CGOptions::hash_value_printf()) {
+			output_tab(out, indent);
+			out << "if (print_hash_value) " << make_print_index_str(cvs) << endl;
+		}
+	}
+	else {
+		if (type->eType == eSimple) {
+			output_tab(out, indent);
+			out << Variable::sink_var_name << " = ";
+			output_with_indices(out, cvs, obj);
 			out << ";";
 		}
 	}

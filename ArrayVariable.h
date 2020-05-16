@@ -41,15 +41,30 @@ public:
 	virtual void Output(std::ostream &) const;
 	virtual void OutputDef(std::ostream &out, int indent) const;
 	virtual void OutputDecl(std::ostream &) const;
+
 	virtual void hash(std::ostream& out) const;
+	// 新的方法
+	virtual void hash(std::ostream& out, string obj) const;
+
 	virtual const Variable* get_collective(void) const { return collective ? collective : this;}
 	virtual const ArrayVariable* get_array(string& /*field*/) const { return this;}
 	virtual void OutputLowerBound(std::ostream &) const;
 	virtual void OutputUpperBound(std::ostream &) const;
+	
 	void output_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs) const;
+	// 新的输出方法
+	void output_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs, string obj) const;
+	
 	void output_checksum_with_indices(std::ostream &out, const std::vector<const Variable*>& cvs, string field_name) const;
+	
 	void output_init(std::ostream &out, const Expression* init, const vector<const Variable*>& cvs, int indent) const;
+	// 新的输出方法
+	void output_init(std::ostream &out, const Expression* init, const vector<const Variable*>& cvs, int indent, string obj) const;
+	
 	void output_addr_checks(std::ostream &out, const Variable* var, string field_name, int indent) const;
+	// 新的输出方法
+	void output_addr_checks(std::ostream &out, const Variable* var, string field_name, int indent, string obj) const;
+
 	void add_init_value(const Expression* e) { init_values.push_back(e);}
 	const vector<const Expression*>& get_init_values(void) const { return init_values;}
 	string build_initializer_str(const vector<string>& init_strings) const;

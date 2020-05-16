@@ -76,6 +76,9 @@ public:
 	const Variable* get_named_var(void) const;
 	const Variable* match_var_name(const string& vname) const;
 	virtual void hash(std::ostream& out) const;
+	// 新的函数
+	virtual void hash(std::ostream& out, string obj) const;
+
 	virtual const Variable* get_collective(void) const;
 	virtual const ArrayVariable* get_array(string& field) const;
 	virtual int get_index_vars(vector<const Variable*>& /* vars */) const { return 0;}
@@ -142,7 +145,12 @@ void OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, i
 void OutputArrayCtrlVars(const vector<const Variable*>& ctrl_vars, std::ostream &out, size_t dimen, int indent);
 void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int indent, const string &fp_string);
 void MapVariableList(const vector<Variable*> &var, std::ostream &out, int (*func)(Variable *var, std::ostream *pOut));
+// 新的函数
+void MapVariableList(const vector<Variable*> &var, std::ostream &out, string obj);
+
 int HashVariable(Variable *var, std::ostream *pOut);
+// 新的函数
+int HashVariable(Variable *var, std::ostream *pOut, string obj);
 
 int find_variable_in_set(const vector<const Variable*>& set, const Variable* v);
 int find_variable_in_set(const vector<Variable*>& set, const Variable* v);

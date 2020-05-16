@@ -1560,6 +1560,12 @@ HashGlobalVariables(std::ostream &out)
 	MapVariableList(*VariableSelector::GetGlobalVariables(), out, HashVariable);
 }
 
+void
+HashGlobalVariables(std::ostream &out, std::string obj)
+{
+	MapVariableList(*VariableSelector::GetGlobalVariables(), out, obj);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Local Variables:

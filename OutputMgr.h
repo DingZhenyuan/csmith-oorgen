@@ -62,6 +62,8 @@ public:
 	virtual void output_tab(ostream &out, int indent);
 
 	void OutputPtrResets(ostream &out, const vector<const Variable*>& ptrs);
+	// 新的输出方法
+	void OutputPtrResets(ostream &out, const vector<const Variable*>& ptrs, string obj);
 
 	static const char *hash_func_name;
 

@@ -145,6 +145,8 @@ void OutputGlobalVariablesClass(int funcIndex, int funcNumPerClass, std::ofstrea
 
 void OutputGlobalVariablesDecls(std::ostream &, std::string prefix = "");
 void HashGlobalVariables(std::ostream &);
+// 新的Hash输出函数
+void HashGlobalVariables(std::ostream &out, std::string obj);
 
 ///////////////////////////////////////////////////////////////////////////////
 

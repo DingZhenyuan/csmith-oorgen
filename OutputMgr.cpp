@@ -123,7 +123,7 @@ OutputMgr::OutputMain(std::ostream &out)
 	#endif
 		// resetting all global dangling pointer to null per Rohit's request
 		if (!CGOptions::dangling_global_ptrs()) {
-			OutputPtrResets(out, GetFirstFunction()->dead_globals);
+			// OutputPtrResets(out, GetFirstFunction()->dead_globals);
 		}
 
 		if (CGOptions::step_hash_by_stmt())
@@ -208,22 +208,30 @@ void OutputMgr::OutputMain(std::ostream &out, vector<ClassType> classTypes)
 			out << "    crc32_gentab();" << endl;
 		}
 
-		ExtensionMgr::OutputFirstFunInvocation(out, invoke);
+		// 去掉原方法中调用函数的部分
+		// ExtensionMgr::OutputFirstFunInvocation(out, invoke);
 
-	#if 0
-		out << "    ";
-		invoke->Output(out);
-		out << ";" << endl;
-	#endif
 		// resetting all global dangling pointer to null per Rohit's request
 		if (!CGOptions::dangling_global_ptrs()) {
 			OutputPtrResets(out, GetFirstFunction()->dead_globals);
+			// OutputPtrResets(out, GetFirstFunction()->dead_globals, obj);
 		}
 
-		if (CGOptions::step_hash_by_stmt())
-			OutputMgr::OutputHashFuncInvocation(out, 1);
-		else
-			HashGlobalVariables(out);
+		// 对所有的对象中的成员变量进行CRC运算
+		for (int i = 0; i < classTypes.size(); i++) {
+			if (!classTypes[i].getAbstract()) {
+				string obj = "obj_" + classTypes[i].getName() + ".";
+				// cout << obj << endl;
+				
+				if (CGOptions::step_hash_by_stmt()) {
+					OutputMgr::OutputHashFuncInvocation(out, 1);
+				}
+				else {
+					HashGlobalVariables(out, obj);
+				}
+			}
+		}
+
 		if (CGOptions::compute_hash()) {
 			out << "    platform_main_end(crc32_context ^ 0xFFFFFFFFUL, print_hash_value);" << endl;
 		} else {
@@ -561,7 +569,30 @@ OutputMgr::OutputPtrResets(ostream &out, const vector<const Variable*>& ptrs)
 			const ArrayVariable* av = (const ArrayVariable*)v;
 			Constant zero(get_int_type(), "0");
 			vector<const Variable *> &ctrl_vars = Variable::get_last_ctrl_vars();
+			// av->output_init(out, &zero, ctrl_vars, 1);
+			av->output_init(out, &zero, ctrl_vars, 2);
+		}
+		else {
+			output_tab(out, 1);
+			v->Output(out);
+			out << " = 0;";
+			outputln(out);
+		}
+	}
+}
+
+void
+OutputMgr::OutputPtrResets(ostream &out, const vector<const Variable*>& ptrs, string obj)
+{
+	size_t i;
+	for (i=0; i<ptrs.size(); i++) {
+		const Variable* v = ptrs[i];
+		if (v->isArray) {
+			const ArrayVariable* av = (const ArrayVariable*)v;
+			Constant zero(get_int_type(), "0");
+			vector<const Variable *> &ctrl_vars = Variable::get_last_ctrl_vars();
 			av->output_init(out, &zero, ctrl_vars, 1);
+			// av->output_init(out, &zero, ctrl_vars, 1, obj);
 		}
 		else {
 			output_tab(out, 1);
