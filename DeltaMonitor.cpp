@@ -150,9 +150,8 @@ DeltaMonitor::OutputStatistics(ostream &out)
 	}
 }
 
-void
-DeltaMonitor::Output(ostream &out)
-{
+// 输出Delta监控内容
+void DeltaMonitor::Output(ostream &out) {
 	if (!DeltaMonitor::is_running_)
 		return;
 

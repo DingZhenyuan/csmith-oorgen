@@ -21,6 +21,7 @@
 #include "git_version.h"
 #include "random.h"
 #include "util.h"
+#include "DeltaMonitor.h"
 
 #include "ModelReader.h"
 
@@ -53,6 +54,7 @@ void
 OutputMgr::set_curr_func(const std::string &fname)
 {
 	OutputMgr::curr_func_ = fname;
+	// cout << fname << endl;
 }
 
 bool
@@ -268,6 +270,8 @@ void OutputMgr::OutputHeaderClass(int argc, char *argv[], unsigned long seed, of
 		out_c << "#include <float.h>\n";
 		out_c << "#include <math.h>\n";
 	}
+
+	// 加入各class文件的头
 
 	ExtensionMgr::OutputHeader(out_c);
 
@@ -510,29 +514,34 @@ void OutputMgr::OutputFunc(ofstream &out_c) {
 }
 
 // 新的Output
-void OutputMgr::OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c, bool outVariable) {
+void OutputMgr::OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c, bool outVariable, bool outMain) {
 	// if (DeltaMonitor::is_running() && (Error::get_error() != SUCCESS)) {
 	// 	out_c << "Delta reduction error!\n";
 	// }
-	if (outVariable) {
-		OutputStructUnionDeclarationsClass(out_c);
-		OutputGlobalVariablesClass(funcIndex, funcNumPerClass, out_c);
+	
+	if (outMain) {
+		// 输出Main函数
+		if (!CGOptions::nomain())
+			OutputMain(out_c);
+		OutputTail(out_c);
+		DeltaMonitor::Output(out_c);
 	}
-	// OutputForwardDeclarationsClass(out_c);
-	OutputFunctionsClass(funcIndex, funcNumPerClass, out_c);
-	out_c << "\n};" << endl;
+	else {
+		if (outVariable) {
+			OutputStructUnionDeclarationsClass(out_c);
+			OutputGlobalVariablesClass(funcIndex, funcNumPerClass, out_c);
+		}
+		// OutputForwardDeclarationsClass(out_c);
+		OutputFunctionsClass(funcIndex, funcNumPerClass, out_c);
+		out_c << "};" << endl;
+	}
+
 
 	// if (CGOptions::step_hash_by_stmt()) {
 	// 	OutputMgr::OutputHashFuncDef(out);
 	// 	OutputMgr::OutputStepHashFuncDef(out);
-	// }
-
-	// 输出Main函数
+	// }	
 	
-	// if (!CGOptions::nomain())
-	// 	OutputMain(out);
-	// OutputTail(out);
-	// DeltaMonitor::Output(out);
 }
 
 //////////////////////////////////////////////////////////////////

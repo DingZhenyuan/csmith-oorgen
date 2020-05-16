@@ -524,14 +524,20 @@ Function::OutputForwardDecl(std::ostream &out)
 void
 Function::Output(std::ostream &out)
 {
+
+
 	if (is_builtin)
 		return;
+
 	OutputMgr::set_curr_func(name);
+
 	output_comment_line(out, "------------------------------------------");
 	if (!CGOptions::concise()) {
 		feffect.Output(out);
 	}
+
 	OutputHeader(out);
+
 	outputln(out);
 
 	if (CGOptions::depth_protect()) {
@@ -544,6 +550,7 @@ Function::Output(std::ostream &out)
 	if (!fact_changed && !union_field_read && !is_pointer_referenced()) {
 		fm = 0;
 	}
+
 	body->Output(out, fm);
 
 	if (CGOptions::depth_protect()) {

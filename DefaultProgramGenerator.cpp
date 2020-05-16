@@ -87,7 +87,7 @@ void DefaultProgramGenerator::goGenerator() {
 		if (i < classTypes.size() - 1) {
 			funcNum = funcNumPerClass;
 		} else {
-			funcNum = FuncListSize() - funcNumPerClass * (i - 1);
+			funcNum = FuncListSize() - funcNumPerClass * i;
 		}
 
 		ofstream out_c("codes/" + classTypes[i].getName() + ".cpp");
@@ -103,10 +103,18 @@ void DefaultProgramGenerator::goGenerator() {
 		if (classTypes[i].getParent() == "") {
 			outVariable = true;
 		}
-		output_mgr_->OutputFunc(funcNumPerClass * i, funcNum, out_c, outVariable);
+		output_mgr_->OutputFunc(funcNumPerClass * i, funcNum, out_c, outVariable, false);
 
 		out_c.close();
 	}
+
+	ofstream out_c("codes/main.cpp");
+	// 输出main函数的头
+	output_mgr_->OutputHeaderClass(argc_, argv_, seed_, out_c);
+
+	// 输出main函数相关
+	output_mgr_->OutputFunc(0, 0, out_c, false, true);
+	out_c.close();
 	
 	// output_mgr_->OutputHeader(argc_, argv_, seed_);
 	// // 生成所有Types

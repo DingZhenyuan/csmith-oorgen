@@ -50,7 +50,10 @@ public:
 	// 新的输出函数
 	virtual void OutputFunc(ofstream &out_c);
 	// 新的输出函数
-	virtual void OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c, bool outVariable);
+	virtual void OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c, bool outVariable, bool outMain);
+
+	// 输出main函数
+	// virtual void OutputMainFuct(std::ofstream &out);
 
 	virtual void outputln(ostream &out) {out << std::endl;}
 
