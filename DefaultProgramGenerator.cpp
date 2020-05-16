@@ -98,8 +98,12 @@ void DefaultProgramGenerator::goGenerator() {
 
 		// Function::GenerateMemberFunction(funcNumPerClass * i, funcNumPerClass);
 		// output_mgr_->OutputFunc(out_c);
-		
-		output_mgr_->OutputFunc(funcNumPerClass * i, funcNum, out_c);
+
+		bool outVariable = false;
+		if (classTypes[i].getParent() == "") {
+			outVariable = true;
+		}
+		output_mgr_->OutputFunc(funcNumPerClass * i, funcNum, out_c, outVariable);
 
 		out_c.close();
 	}

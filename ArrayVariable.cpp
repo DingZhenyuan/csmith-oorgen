@@ -481,6 +481,8 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 {
 	if (collective == 0) {
 		output_tab(out, indent);
+		// 格式调整
+		out << '\t';
 		if (!no_loop_initializer() ) {
 			// don't print definition for array, rather use a loop initializer
 			OutputDecl(out);
@@ -499,9 +501,11 @@ ArrayVariable::OutputDef(std::ostream &out, int indent) const
 			}
 
 			// force global variables to be static if necessary
-			if (CGOptions::force_globals_static() && is_global()) {
-				out << "static ";
-			}
+			
+			// 取消static
+			// if (CGOptions::force_globals_static() && is_global()) {
+			// 	out << "static ";
+			// }
 
 			// print type, name, and dimensions
 			output_qualified_type(out);
@@ -627,6 +631,7 @@ ArrayVariable::output_checksum_with_indices(std::ostream &out,
 void
 ArrayVariable::output_init(std::ostream &out, const Expression* init, const vector<const Variable*>& cvs, int indent) const
 {
+	// indent++;
 	if (collective != 0) return;
 	size_t i;
 

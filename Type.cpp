@@ -1101,13 +1101,13 @@ Type::make_random_struct_type(void)
     if (CGOptions::packed_struct()) {
 	if (CGOptions::ccomp() && (has_aggregate_field(random_fields) || has_longlong_field(random_fields))) {
 		// Nothing to do
-	}
-	else {
+	} else {
             packed = rnd_flipcoin(50);
             ERROR_GUARD(NULL);
         }
     }
     bool hasImplicitNontrivialAssignOps = hasAssignOps || checkImplicitNontrivialAssignOps(random_fields);
+	// 创建Struct对应的Type
     Type* new_type = new Type(random_fields, true, packed, qualifiers, fields_length, hasAssignOps, hasImplicitNontrivialAssignOps);
     return new_type;
 }
@@ -1673,6 +1673,7 @@ Type::contain_pointer_field(void) const
 }
 
 // ---------------------------------------------------------------------
+
 void
 Type::Output(std::ostream &out) const
 {
@@ -1688,11 +1689,36 @@ Type::Output(std::ostream &out) const
 			out << "_t";
 		}
 		break;
-	case ePointer:   ptr_type->Output( out ); out << "*"; break;
+	case ePointer: {
+		// out << "    ";
+		ptr_type->Output( out ); 
+		out << "*"; break;
+	}
 	case eUnion:     out << "union U" << sid; break;
 	case eStruct:    out << "struct S" << sid; break;
 	}
 }
+
+// void
+// Type::Output(std::ostream &out) const
+// {
+// 	switch (eType) {
+// 	case eSimple:
+// 		if (this->simple_type == eVoid) {
+// 			out << "void";
+// 		} else if (this->simple_type == eFloat) {
+// 		        out << "float";
+// 		} else {
+// 			out << (is_signed() ? "int" : "uint");
+// 			out << (SizeInBytes() * 8);
+// 			out << "_t";
+// 		}
+// 		break;
+// 	case ePointer:   ptr_type->Output( out ); out << "*"; break;
+// 	case eUnion:     out << "union U" << sid; break;
+// 	case eStruct:    out << "struct S" << sid; break;
+// 	}
+// }
 
 void
 Type::get_type_sizeof_string(std::string &s) const
@@ -1814,22 +1840,28 @@ void OutputStructUnion(Type* type, std::ostream &out)
     // sanity check
     assert (type->is_aggregate());
 
-    if (!type->printed) {
-        // output dependent structs, if any
+	// output dependent structs, if any
+	// if (!type->printed) {
+        
+    // }
+
         for (i=0; i<type->fields.size(); i++) {
 			if (type->fields[i]->is_aggregate()) {
                 OutputStructUnion((Type*)type->fields[i], out);
             }
         }
-        // output myself
-        if (type->packed_) {
-            if (!CGOptions::ccomp()) {
-                out << "#pragma pack(push)";
-                really_outputln(out);
-            }
-            out << "#pragma pack(1)";
-            really_outputln(out);
-        }
+		// 格式调整
+		// out << "    ";
+        
+		// output myself
+        // if (type->packed_) {
+        //     if (!CGOptions::ccomp()) {
+        //         out << "#pragma pack(push)";
+        //         really_outputln(out);
+        //     }
+        //     out << "#pragma pack(1)";
+        //     really_outputln(out);
+        // }
         type->Output(out);
         out << " {";
 		really_outputln(out);
@@ -1837,7 +1869,7 @@ void OutputStructUnion(Type* type, std::ostream &out)
 		assert(type->fields.size() == type->qfers_.size());
 		unsigned int j = 0;
         for (i=0; i<type->fields.size(); i++) {
-            out << "   ";
+            out << "    ";
 			const Type *field = type->fields[i];
 			bool is_bitfield = type->is_bitfield(i);
             if (is_bitfield) {
@@ -1876,18 +1908,99 @@ void OutputStructUnion(Type* type, std::ostream &out)
         out << "};";
 		really_outputln(out);
         if (type->packed_) {
-		if (CGOptions::ccomp()) {
-			out << "#pragma pack()";
-		}
-		else {
-			out << "#pragma pack(pop)";
-		}
+		// if (CGOptions::ccomp()) {
+		// 	out << "#pragma pack()";
+		// }
+		// else {
+		// 	out << "#pragma pack(pop)";
+		// }
 		really_outputln(out);
         }
         type->printed = true;
-		really_outputln(out);
-    }
+		out << endl;
+		// really_outputln(out);
 }
+
+// void OutputStructUnion(Type* type, std::ostream &out)
+// {
+//     size_t i;
+//     // sanity check
+//     assert (type->is_aggregate());
+
+//     if (!type->printed) {
+//         // output dependent structs, if any
+//         for (i=0; i<type->fields.size(); i++) {
+// 			if (type->fields[i]->is_aggregate()) {
+//                 OutputStructUnion((Type*)type->fields[i], out);
+//             }
+//         }
+//         // output myself
+//         if (type->packed_) {
+//             if (!CGOptions::ccomp()) {
+//                 out << "#pragma pack(push)";
+//                 really_outputln(out);
+//             }
+//             out << "#pragma pack(1)";
+//             really_outputln(out);
+//         }
+//         type->Output(out);
+//         out << " {";
+// 		really_outputln(out);
+
+// 		assert(type->fields.size() == type->qfers_.size());
+// 		unsigned int j = 0;
+//         for (i=0; i<type->fields.size(); i++) {
+//             out << "   ";
+// 			const Type *field = type->fields[i];
+// 			bool is_bitfield = type->is_bitfield(i);
+//             if (is_bitfield) {
+// 				assert(field->eType == eSimple);
+// 				type->qfers_[i].OutputFirstQuals(out);
+// 				if (field->simple_type == eInt)
+// 					out << "signed";
+// 				else if (field->simple_type == eUInt)
+// 					out << "unsigned";
+// 				else
+// 					assert(0);
+// 				int length = type->bitfields_length_[i];
+// 				assert(length >= 0);
+// 				if (length == 0)
+// 					out << " : ";
+// 				else
+// 					out << " f" << j++ << " : ";
+// 				out << length << ";";
+// 			}
+// 			else {
+// 				type->qfers_[i].output_qualified_type(field, out);
+// 				out << " f" << j++ << ";";
+// 			}
+// 			really_outputln(out);
+//         }
+
+// 		if (type->eType == eStruct){
+// 			OutputStructAssignOp(type, out, false);
+// 			OutputStructAssignOp(type, out, true);
+// 		}
+// 		else{
+// 			OutputUnionAssignOps(type, out, false);
+// 			OutputUnionAssignOps(type, out, true);
+// 		}
+
+//         out << "};";
+// 		really_outputln(out);
+//         if (type->packed_) {
+// 		if (CGOptions::ccomp()) {
+// 			out << "#pragma pack()";
+// 		}
+// 		else {
+// 			out << "#pragma pack(pop)";
+// 		}
+// 		really_outputln(out);
+//         }
+//         type->printed = true;
+// 		really_outputln(out);
+//     }
+// }
 
 // ---------------------------------------------------------------------
 /* print all struct definitions (fields etc)
@@ -1910,6 +2023,7 @@ OutputStructUnionDeclarations(std::ostream &out)
 void OutputStructUnionDeclarationsClass(ofstream &out_c) {
 	size_t i;
 	// output_comment_line(out_c, "--- Struct/Union Declarations ---")
+	out_c << "\t";
 	for (i=0; i<AllTypes.size(); i++)
     {
         Type* t = AllTypes[i];

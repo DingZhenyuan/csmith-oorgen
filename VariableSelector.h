@@ -9,6 +9,8 @@ using namespace std;
 #include "Variable.h"
 #include "Type.h"
 
+#include <fstream>
+
 class CGContext;
 class Expression;
 class Function;
@@ -137,6 +139,10 @@ private:
 };
 
 void OutputGlobalVariables(std::ostream &);
+
+// 新的输出全局变量
+void OutputGlobalVariablesClass(int funcIndex, int funcNumPerClass, std::ofstream &out);
+
 void OutputGlobalVariablesDecls(std::ostream &, std::string prefix = "");
 void HashGlobalVariables(std::ostream &);
 

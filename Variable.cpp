@@ -632,22 +632,33 @@ Variable::get_array(string& field) const
 void
 Variable::OutputDef(std::ostream &out, int indent) const
 {
+	// indent++;
 	output_tab(out, indent);
 	// force global variables to be static if necessary
-	if (CGOptions::force_globals_static() && is_global()) {
-		out << "static ";
-	}
+
+	// 这里先不打印static
+	// if (CGOptions::force_globals_static() && is_global()) {
+	// 	out << "static ";
+	// }
+
+	// 格式调整
+	out << "\t";
+
 	output_qualified_type(out);
 	out << get_actual_name() << " = ";
 	assert(init);
 	init->Output(out);
 	out << ";";
-	if (is_volatile()) {
-		string comment = "VOLATILE GLOBAL " + get_actual_name();
-		output_comment_line(out, comment);
-	} else {
-		outputln(out);
-	}
+
+	// 这里不对volatile的变量进行标注
+	// if (is_volatile()) {
+	// 	string comment = "VOLATILE GLOBAL " + get_actual_name();
+	// 	output_comment_line(out, comment);
+	// } else {
+	// 	outputln(out);
+	// }
+
+	outputln(out);
 }
 
 void Variable::OutputDecl(std::ostream &out) const
@@ -811,6 +822,7 @@ MapVariableList(const vector<Variable*> &var, std::ostream &out,
 void
 OutputArrayCtrlVars(const vector <const Variable*> &ctrl_vars, std::ostream &out, size_t dimen, int indent)
 {
+	// indent++;
 	assert(dimen <= ctrl_vars.size());
 	output_tab(out, indent);
 	out << "int ";
@@ -840,10 +852,34 @@ Variable::GetMaxArrayDimension(const vector<Variable*>& vars)
 	return dimen;
 }
 
-void
-OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int indent)
+// void
+// OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int indent)
+// {
+	
+// 	size_t i, dimen;
+// 	dimen = Variable::GetMaxArrayDimension(vars);
+// 	if (dimen) {
+// 		vector <const Variable*> &ctrl_vars = Variable::get_new_ctrl_vars();
+// 		OutputArrayCtrlVars(ctrl_vars, out, dimen, indent);
+// 		for (i=0; i<vars.size(); i++) {
+// 			if (vars[i]->isArray) {
+// 				ArrayVariable* av = (ArrayVariable*)(vars[i]);
+// 				if (!av->no_loop_initializer()) {
+// 					av->output_init(out, av->init, ctrl_vars, indent);
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+
+// 新的输出数组
+void OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int indent)
 {
+	// 格式调整
+	// indent++;
+	
 	size_t i, dimen;
+	// out << '\t';
 	dimen = Variable::GetMaxArrayDimension(vars);
 	if (dimen) {
 		vector <const Variable*> &ctrl_vars = Variable::get_new_ctrl_vars();
@@ -857,6 +893,8 @@ OutputArrayInitializers(const vector<Variable*>& vars, std::ostream &out, int in
 			}
 		}
 	}
+	// 格式调整
+	// indent--;
 }
 
 void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int indent, const string &fp_string)
@@ -870,6 +908,20 @@ void OutputVolatileAddress(const vector<Variable*> &vars, std::ostream &out, int
 }
 
 // --------------------------------------------------------------
+// void
+// OutputVariableList(const vector<Variable*> &vars, std::ostream &out, int indent)
+// {
+// 	size_t i;
+// 	// have to use iterator instead of map because we need indent as paramter
+// 	for (i=0; i<vars.size(); i++) {
+// 		vars[i]->OutputDef(out, indent);
+// 	}
+// 	if (!vars.empty() && !vars[0]->is_global()) {
+// 		OutputArrayInitializers(vars, out, indent);
+// 	}
+// }
+
+// 新的输出变量的定义
 void
 OutputVariableList(const vector<Variable*> &vars, std::ostream &out, int indent)
 {

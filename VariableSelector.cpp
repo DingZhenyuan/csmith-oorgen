@@ -1532,6 +1532,17 @@ OutputGlobalVariables(std::ostream &out)
 	CGOptions::access_once(access_once);
 }
 
+// 新的输出全局变量
+void OutputGlobalVariablesClass(int funcIndex, int funcNumPerClass, std::ofstream &out) {
+	// output_comment_line(out, "--- GLOBAL VARIABLES ---");
+	vector<Variable *>& vars = *(VariableSelector::GetGlobalVariables());
+	bool access_once = CGOptions::access_once();
+
+	CGOptions::access_once(false);
+	OutputVariableList(vars, out);
+	CGOptions::access_once(access_once);
+}
+
 void
 OutputGlobalVariablesDecls(std::ostream &out, std::string prefix)
 {

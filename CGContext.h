@@ -127,11 +127,11 @@ private:
 
 
 public: // XXX
-	int blk_depth;
-	int expr_depth;
+	int blk_depth; // block的深度
+	int expr_depth; // expression的深度
 	unsigned int flags;
-	std::vector<const Block*> call_chain;
-	const Block* curr_blk;
+	std::vector<const Block*> call_chain; // 块的调用链
+	const Block* curr_blk; // 当前块
 	RWDirective* rw_directive;
 	// induction variables for loops, with each IV controls one nested loop
 	map<const Variable*, unsigned int> iv_bounds;

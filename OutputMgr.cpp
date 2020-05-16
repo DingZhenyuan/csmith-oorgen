@@ -311,14 +311,19 @@ void OutputMgr::OutputHeaderClass(int argc, char *argv[], unsigned long seed, of
 void OutputMgr::OutputClass(ClassType classType, ofstream &out_c) {
 	// 输出类声明
 	if (classType.getParent() == "" && classType.getAbstract() == false) {
-		out_c << "class " << classType.getName() << " {" << endl;
+		out_c << "class " << classType.getName() << endl;
+		out_c << "{" << endl;
 	} else if(classType.getAbstract()) {
-		out_c << "virtual class " << classType.getName() << " {" << endl;
+		out_c << "virtual class " << classType.getName() << endl;
+		out_c << "{" << endl;
 	} else if (classType.getParent() != "") {
-		out_c << "class " << classType.getName() << " : public " << classType.getParent() << " {" << endl;
+		out_c << "class " << classType.getName() << " : public " << classType.getParent() << endl;
+		out_c << "{" << endl;
 	} else {
 		cout << "error: virtual & parent!" << endl;
 	}
+
+	out_c << "private:" << endl;
 
 	// 输出属性声明
 	vector<SimpleAttribute> simpleAttributes = classType.getAttributes();
@@ -330,8 +335,10 @@ void OutputMgr::OutputClass(ClassType classType, ofstream &out_c) {
         }
 	}
 
+	out_c << "\npublic:" << endl;
+
 	// 类定义结束
-	out_c << "};" << endl;
+	// out_c << "};" << endl;
 }
 
 
@@ -465,10 +472,18 @@ OutputMgr::output_tab(ostream &out, int indent)
 	OutputMgr::output_tab_(out, indent);
 }
 
+// void
+// OutputMgr::really_outputln(ostream &out)
+// {
+// 	out << std::endl;
+// }
+
 void
 OutputMgr::really_outputln(ostream &out)
 {
-	out << std::endl;
+	// out << std::endl;
+	// 格式调整
+	out << "\n    ";
 }
 
 // 新的Output
@@ -477,7 +492,7 @@ void OutputMgr::OutputFunc(ofstream &out_c) {
 	// 	out_c << "Delta reduction error!\n";
 	// }
 	OutputStructUnionDeclarationsClass(out_c);
-	// OutputGlobalVariablesClass(out_c);
+	OutputGlobalVariables(out_c);
 	OutputForwardDeclarationsClass(out_c);
 	OutputFunctionsClass(out_c);
 
@@ -495,14 +510,17 @@ void OutputMgr::OutputFunc(ofstream &out_c) {
 }
 
 // 新的Output
-void OutputMgr::OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c) {
+void OutputMgr::OutputFunc(int funcIndex, int funcNumPerClass, ofstream &out_c, bool outVariable) {
 	// if (DeltaMonitor::is_running() && (Error::get_error() != SUCCESS)) {
 	// 	out_c << "Delta reduction error!\n";
 	// }
-	OutputStructUnionDeclarationsClass(out_c);
-	// OutputGlobalVariablesClass(out_c);
-	OutputForwardDeclarationsClass(out_c);
+	if (outVariable) {
+		OutputStructUnionDeclarationsClass(out_c);
+		OutputGlobalVariablesClass(funcIndex, funcNumPerClass, out_c);
+	}
+	// OutputForwardDeclarationsClass(out_c);
 	OutputFunctionsClass(funcIndex, funcNumPerClass, out_c);
+	out_c << "\n};" << endl;
 
 	// if (CGOptions::step_hash_by_stmt()) {
 	// 	OutputMgr::OutputHashFuncDef(out);
